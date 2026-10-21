@@ -1,0 +1,50 @@
+name: Publish shared rules
+on:
+  push:
+    branches: [main]
+    paths:
+      - COMMON_RULES.md
+      - UpdateRules.py
+      - AGENTS.md
+      - tests/**
+      - .github/workflows/publish-rules.yml
+permissions:
+  contents: write
+concurrency:
+  group: shared-rules-release
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify synchronization behavior
+        run: python -m unittest discover -s tests -v
+      - name: Publish immutable versioned assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,re,urllib.request
+          from pathlib import Path
+          version=re.search(r'^RulesVersion: (.+)$',Path('COMMON_RULES.md').read_text(encoding='utf-8'),re.M)[1].strip()
+          if not re.fullmatch(r'\d{4}-\d{2}-\d{2}\.\d+',version):raise SystemExit('Invalid RulesVersion')
+          repo=os.environ['GITHUB_REPOSITORY'];token=os.environ['GH_TOKEN'];sha=os.environ['GITHUB_SHA']
+          api='https://api.github.com/repos/'+repo
+          def request(url,data=None,method=None,ctype='application/json'):
+              body=data if isinstance(data,bytes) else json.dumps(data).encode() if data is not None else None
+              req=urllib.request.Request(url,data=body,method=method,headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':ctype,'X-GitHub-Api-Version':'2022-11-28'})
+              with urllib.request.urlopen(req,timeout=60) as response:return json.load(response)
+          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md']
+          Path('SHA256SUMS.txt').write_text(''.join(hashlib.sha256(Path(p).read_bytes()).hexdigest()+'  '+p+'\n' for p in assets),encoding='utf-8')
+          release=request(api+'/releases',{'tag_name':'rules-'+version,'target_commitish':sha,'name':'Shared rules '+version,'body':'Shared rules and guarded updater. Source commit: '+sha,'draft':True,'prerelease':False},'POST')
+          upload=release['upload_url'].split('{')[0]
+          for name in assets+['SHA256SUMS.txt']:
+              result=request(upload+'?name='+name,Path(name).read_bytes(),'POST','application/octet-stream')
+              if result['size']!=Path(name).stat().st_size:raise SystemExit('Uploaded size mismatch: '+name)
+          result=request(api+'/releases/'+str(release['id']),{'draft':False,'make_latest':'true'},'PATCH')
+          print('Published '+result['html_url']+' at '+sha)
+          PY
