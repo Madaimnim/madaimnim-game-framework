@@ -27,7 +27,7 @@
 - 工具只修改 COMMON_RULES.md 及本機同步基線；不自動覆蓋專案 AGENTS.md／PROJECT_RULES.md，不修改遊戲或自行提交。
 - 使用本文對應版本的 UpdateRules.py。舊工具未提供 UpdaterVersion、降版／同版衝突及本機修改保護時，由 AI 從同一 Release 取得工具並比對 SHA256SUMS，確認符合現有入口後更新專案既有 Tools/UpdateRules.py；不額外建立第二個更新器。
 - 比對內容與版本：相同內容則不重寫；遠端較舊或同版內容不同則阻擋；本機偏離已同步基線／Git HEAD 則阻擋自動覆蓋。必要時先分析及合併回共用來源並發布，再經明確的 --accept-local-replacement 更新本機副本，不能以該選項掩蓋未核對變更。
-- 目前專案同步後再次核對來源版本與 SHA-256；其他專案於各自下次工作更新，只有使用者明確要求全專案同步才逐一處理。
+- 發布後依已登記的使用者工作區授權執行全專案同步：UpdateRules.py --workspace-root <工作區根> --sync-updater 先預覽，再加 --apply 套用；每案回讀版本／SHA-256，列出受阻項目。沒有全專案授權時僅同步目前專案，其他專案維持各自下次工作更新。已登記的全工作區授權不逐次重問；私人路徑只記在本機 .git/rules-workspaces.json 或相關專案 PROJECT_RULES.md。
 
 ## 完成回報
 
