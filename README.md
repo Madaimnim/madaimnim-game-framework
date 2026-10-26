@@ -2,6 +2,11 @@
 
 跨專案共用規範及同步工具。遊戲專用設定、帳密與成果文件留在各自專案。
 
+## 美術生成與組裝
+
+統一規則位於 [COMMON_RULES.md「美術生成與組裝」](COMMON_RULES.md#美術生成與組裝)，涵蓋參考分析、生成素材、裝飾與留白、組裝重用、實際驗收與AI感修正；不限特定專案或畫風。各專案沿用同一RulesSource與更新器即可讀到，不另複製一份永久規則。
+
+要讓尚無專案規範的新任務也套用，須在該執行環境的Codex使用者層級AGENTS.md配置本節核心要求及本來源。可將本節以有版本標記的區塊同步至全域入口；正式維護來源仍只有本儲存庫。新機／不同CODEX_HOME／雲端須另外配置，不能只上傳GitHub就宣稱所有環境生效。專案初始化時再接入RulesSource／RulesMaintenance與既有Tools/UpdateRules.py，不覆蓋專案專用內容。
 ## 維護共用內容
 
 先讀 [AGENTS.md](AGENTS.md) 及 [COMMON_RULES.md](COMMON_RULES.md)。使用者明確要求維護共用規範時，依入口完成比對、測試、提交、推送、Release 與回讀驗證；一般專案下載不觸發發布。
