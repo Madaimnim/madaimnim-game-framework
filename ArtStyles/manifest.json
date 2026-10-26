@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "libraryVersion": "2026-10-26.5",
+  "styles": [
+    {
+      "id": "STYLE-001",
+      "name": "紙境工坊",
+      "aliases": [
+        "風格1",
+        "風格 1",
+        "風格一",
+        "STYLE-1",
+        "紙境工坊"
+      ],
+      "file": "STYLE-001.md",
+      "sha256": "42d173bf33a6c1501f4e0bfbd8f2f2393e637a9bc4541da12bb84db0e4ec85d1",
+      "reference": {
+        "kind": "user-provided commercial-game screenshot",
+        "sha256": "08a6d46cc22018814bb86ce51968e9038688dae2b6ba9b6703527f7da7e69046",
+        "availability": "local-only; redistribution permission unconfirmed",
+        "sourceUrl": null
+      }
+    },
+    {
+      "id": "STYLE-002",
+      "name": "清線冒險",
+      "aliases": [
+        "風格2",
+        "風格 2",
+        "風格二",
+        "STYLE-2",
+        "清線冒險"
+      ],
+      "file": "STYLE-002.md",
+      "sha256": "5b7a7776e38a07f7672038b7bbb55682e1af42a70167fe774a135c41fdc4b2c6",
+      "reference": {
+        "kind": "user-provided commercial-game screenshot",
+        "sha256": "a4b0276bd1d24d45b58c4d2885c3b1cb6965e96198602032efaa2e5c85aced0d",
+        "availability": "local-only; redistribution permission unconfirmed",
+        "sourceUrl": null
+      }
+    }
+  ]
+}

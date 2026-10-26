@@ -176,3 +176,61 @@ class WorkspaceUpdateTests(unittest.TestCase):
         (root / "Tools/UpdateRules.py").write_text("# edited", encoding="utf-8")
         third_bundle = {"COMMON_RULES.md": rules("2026-10-22.6").encode(), "UpdateRules.py": b"# third updater\n"}
         self.assertEqual(u.batch_update(self.workspace, third_bundle, apply=True, sync_updater=True)["projects"][0]["status"], "blocked")
+
+import hashlib
+import json
+
+
+class ArtStyleSynchronizationTests(WorkspaceUpdateTests):
+    def style_bundle(self, content=b'# Clean-line style\n', version='2026-10-26.5'):
+        manifest={'schemaVersion':1,'libraryVersion':version,'styles':[{'id':'STYLE-002','file':'STYLE-002.md','sha256':hashlib.sha256(content).hexdigest()}]}
+        return {'COMMON_RULES.md':rules(version).encode(),'UpdateRules.py':b'# published updater\n','ArtStyles_manifest.json':json.dumps(manifest).encode(),'STYLE-002.md':content}
+
+    def test_style_preview_install_and_local_edit_protection(self):
+        root=self.project('styles');bundle=self.style_bundle()
+        self.assertTrue(u.sync_styles(root,bundle))
+        self.assertFalse((root/'ArtStyles').exists())
+        self.assertTrue(u.sync_styles(root,bundle,apply=True))
+        target=root/'ArtStyles/STYLE-002.md';mtime=target.stat().st_mtime_ns
+        self.assertFalse(u.sync_styles(root,bundle,apply=True))
+        self.assertEqual(target.stat().st_mtime_ns,mtime)
+        extra=root/'ArtStyles/private.txt';extra.write_text('keep')
+        next_bundle=self.style_bundle(b'# Updated style\n','2026-10-26.6')
+        self.assertTrue(u.sync_styles(root,next_bundle,apply=True))
+        self.assertEqual(extra.read_text(),'keep')
+        target.write_text('local style edit')
+        before=(root/'COMMON_RULES.md').read_bytes()
+        report=u.batch_update(self.workspace,self.style_bundle(b'# Third style\n','2026-10-26.7'),apply=True)
+        self.assertEqual(report['projects'][0]['status'],'blocked')
+        self.assertEqual(target.read_text(),'local style edit')
+        self.assertEqual((root/'COMMON_RULES.md').read_bytes(),before)
+
+    def test_style_hash_and_path_validation_precede_writes(self):
+        root=self.project('invalid');bundle=self.style_bundle()
+        bundle['STYLE-002.md']=b'tampered'
+        with self.assertRaises(ValueError):u.sync_styles(root,bundle,apply=True)
+        self.assertFalse((root/'ArtStyles').exists())
+        bundle=self.style_bundle();manifest=json.loads(bundle['ArtStyles_manifest.json'])
+        manifest['styles'][0]['file']='../escape.md'
+        bundle['ArtStyles_manifest.json']=json.dumps(manifest).encode()
+        with self.assertRaises(ValueError):u.sync_styles(root,bundle,apply=True)
+        self.assertFalse((root/'ArtStyles').exists())
+
+    def test_unknown_existing_style_is_not_overwritten(self):
+        root=self.project('unknown-style');(root/'ArtStyles').mkdir()
+        target=root/'ArtStyles/STYLE-002.md';target.write_text('manual original')
+        with self.assertRaises(ValueError):u.sync_styles(root,self.style_bundle(),apply=True)
+        self.assertEqual(target.read_text(),'manual original')
+
+    def test_non_git_project_retains_local_baseline(self):
+        root=self.workspace/'plain';root.mkdir();(root/'AGENTS.md').write_text('entry')
+        u.sync_styles(root,self.style_bundle(),apply=True)
+        self.assertTrue((root/'ArtStyles/.sync-state.json').exists())
+        self.assertTrue(u.sync_styles(root,self.style_bundle(b'# next\n'),apply=True))
+
+    def test_style_update_is_reported_even_when_rules_unchanged(self):
+        root=self.project('style-report','2026-10-26.5');bundle=self.style_bundle()
+        (root/'COMMON_RULES.md').write_bytes(bundle['COMMON_RULES.md'])
+        report=u.batch_update(self.workspace,bundle,apply=True)
+        self.assertEqual(report['projects'][0]['status'],'updated')
+        self.assertTrue(report['projects'][0]['stylesChanged'])

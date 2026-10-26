@@ -6,6 +6,7 @@ on:
       - COMMON_RULES.md
       - UpdateRules.py
       - AGENTS.md
+      - ArtStyles/**
       - tests/**
       - .github/workflows/publish-rules.yml
 permissions:
@@ -38,7 +39,16 @@ jobs:
               body=data if isinstance(data,bytes) else json.dumps(data).encode() if data is not None else None
               req=urllib.request.Request(url,data=body,method=method,headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':ctype,'X-GitHub-Api-Version':'2022-11-28'})
               with urllib.request.urlopen(req,timeout=60) as response:return json.load(response)
-          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md']
+          manifest=json.loads(Path('ArtStyles/manifest.json').read_text(encoding='utf-8'))
+          if manifest['libraryVersion']!=version:raise SystemExit('Style/rules version mismatch')
+          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md','ArtStyles_manifest.json']
+          Path('ArtStyles_manifest.json').write_bytes(Path('ArtStyles/manifest.json').read_bytes())
+          for entry in manifest['styles']:
+              name=entry['file']
+              if not re.fullmatch(r'STYLE-[0-9]{3}\.md',name):raise SystemExit('Unsafe style path')
+              data=Path('ArtStyles',name).read_bytes()
+              if hashlib.sha256(data).hexdigest()!=entry['sha256']:raise SystemExit('Style hash mismatch')
+              Path(name).write_bytes(data);assets.append(name)
           Path('SHA256SUMS.txt').write_text(''.join(hashlib.sha256(Path(p).read_bytes()).hexdigest()+'  '+p+'\n' for p in assets),encoding='utf-8')
           release=request(api+'/releases',{'tag_name':'rules-'+version,'target_commitish':sha,'name':'Shared rules '+version,'body':'Shared rules and guarded updater. Source commit: '+sha,'draft':True,'prerelease':False},'POST')
           upload=release['upload_url'].split('{')[0]

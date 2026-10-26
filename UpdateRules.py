@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-UPDATER_VERSION = "2026-10-22.4"
+UPDATER_VERSION = "2026-10-26.5"
 LIMIT = 262144
 MARKER = "<!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->"
 
@@ -194,10 +194,98 @@ def load_release_bundle():
         if hashlib.sha256(data).hexdigest() != checks.get(name):
             raise ValueError("Release checksum mismatch: " + name)
         bundle[name] = data
+    if "ArtStyles_manifest.json" in checks:
+        data = read("ArtStyles_manifest.json")
+        if hashlib.sha256(data).hexdigest() != checks["ArtStyles_manifest.json"]:
+            raise ValueError("Release style manifest checksum mismatch")
+        bundle["ArtStyles_manifest.json"] = data
+        manifest = json.loads(data.decode("utf-8"))
+        for entry in manifest.get("styles", []):
+            name = entry.get("file", "")
+            if not re.fullmatch(r"STYLE-[0-9]{3}\.md", name):
+                raise ValueError("Unsafe release style filename")
+            data = read(name)
+            if hashlib.sha256(data).hexdigest() != checks.get(name):
+                raise ValueError("Release style checksum mismatch: " + name)
+            bundle[name] = data
+        style_files(bundle)
     _, version, _ = normalized(bundle["COMMON_RULES.md"])
     if tag != "rules-" + version:
         raise ValueError("Release tag and rules version differ")
     return bundle
+
+
+
+def style_files(bundle):
+    """Validate the complete text-only style bundle before any destination write."""
+    if "ArtStyles_manifest.json" not in bundle:
+        return {}
+    payload = bundle["ArtStyles_manifest.json"]
+    manifest = json.loads(payload.decode("utf-8"))
+    if manifest.get("schemaVersion") != 1 or not isinstance(manifest.get("styles"), list):
+        raise ValueError("Invalid art style manifest")
+    files = {"manifest.json": payload}
+    identities = set()
+    for entry in manifest["styles"]:
+        identity, name = entry.get("id", ""), entry.get("file", "")
+        if not re.fullmatch(r"STYLE-[0-9]{3}", identity) or name != identity + ".md" or identity in identities:
+            raise ValueError("Unsafe or duplicate style identity/path")
+        identities.add(identity)
+        data = bundle.get(name)
+        if data is None or len(data) > LIMIT or hashlib.sha256(data).hexdigest() != entry.get("sha256"):
+            raise ValueError("Missing or mismatched style content: " + name)
+        data.decode("utf-8")
+        files[name] = data
+    return files
+
+
+def sync_styles(root, bundle, apply=False):
+    """Preserve local edits and extra files; never follow destination links."""
+    files = style_files(bundle)
+    if not files:
+        return False
+    root = Path(root).resolve(strict=True)
+    directory = root / "ArtStyles"
+    if directory.exists() and (not directory.is_dir() or is_link(directory)):
+        raise ValueError("Linked or invalid ArtStyles directory; preserved")
+    state_path, _ = baseline(root)
+    state_path = state_path.parent / "madaimnim-art-styles.json" if state_path else directory / ".sync-state.json"
+    if state_path.exists() and is_link(state_path):
+        raise ValueError("Linked art style baseline; preserved")
+    known = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    changed = []
+    for name, data in files.items():
+        target = directory / name
+        if target.exists() or target.is_symlink():
+            if is_link(target) or not target.is_file():
+                raise ValueError("Linked or invalid style file; preserved: " + name)
+            current = target.read_bytes()
+            if current == data:
+                continue
+            if known.get(name) != hashlib.sha256(current).hexdigest():
+                raise ValueError("Local style changes or unknown baseline; preserved: " + name)
+        changed.append(name)
+    if apply:
+        directory.mkdir(exist_ok=True)
+        for name in changed:
+            target = directory / name
+            temporary = None
+            try:
+                with tempfile.NamedTemporaryFile(dir=directory, prefix=".style-", suffix=".tmp", delete=False) as stream:
+                    temporary = Path(stream.name)
+                    stream.write(files[name])
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                os.replace(temporary, target)
+                temporary = None
+            finally:
+                if temporary is not None and temporary.exists():
+                    temporary.unlink()
+        for name, data in files.items():
+            if (directory / name).read_bytes() != data:
+                raise ValueError("Style readback mismatch: " + name)
+        state_path.write_text(json.dumps({name: hashlib.sha256(data).hexdigest() for name, data in files.items()}, indent=2), encoding="utf-8")
+    return bool(changed)
 
 
 def batch_update(workspace, bundle, apply=False, sync_updater=False, reviewed_baselines=None):
@@ -256,6 +344,7 @@ def batch_update(workspace, bundle, apply=False, sync_updater=False, reviewed_ba
                             raise ValueError("Modified or untracked updater; manual comparison required")
                 else:
                     tool_changed = True
+            styles_changed = sync_styles(root, bundle, apply=False)
             if apply:
                 with contextlib.redirect_stdout(io.StringIO()):
                     apply_payload(root, bundle["COMMON_RULES.md"], accept_local_replacement=reviewed_rules)
@@ -273,11 +362,13 @@ def batch_update(workspace, bundle, apply=False, sync_updater=False, reviewed_ba
                             temporary.unlink()
                 if sync_updater and tool_state:
                     tool_state.write_text(json.dumps({"normalizedSha256": digest(bundle["UpdateRules.py"].decode("utf-8-sig").replace("\r\n", "\n").rstrip() + "\n")}, indent=2), encoding="utf-8")
-                result["status"] = "updated" if changed or tool_changed else "current"
+                sync_styles(root, bundle, apply=True)
+                result["status"] = "updated" if changed or tool_changed or styles_changed else "current"
                 if normalized(target.read_bytes())[0] != text:
                     raise ValueError("Readback mismatch")
             else:
-                result["status"] = "would_update" if changed or tool_changed else "current"
+                result["status"] = "would_update" if changed or tool_changed or styles_changed else "current"
+            result["stylesChanged"] = styles_changed
             result["rulesChanged"] = changed
             result["updaterChanged"] = tool_changed
         except Exception as error:
@@ -310,7 +401,19 @@ def main():
             return 1 if not report["projects"] or any(p["status"] == "blocked" for p in report["projects"]) else 0
         if args.apply or args.sync_updater or args.reviewed_baselines:
             raise ValueError("--apply and --sync-updater require --workspace-root")
-        update(args.project_root, args.source_uri, args.source_path, args.accept_local_replacement)
+        if args.source_uri or args.source_path:
+            update(args.project_root, args.source_uri, args.source_path, args.accept_local_replacement)
+        else:
+            entry = args.project_root / "AGENTS.md"
+            text = entry.read_text(encoding="utf-8-sig")
+            if not re.search(r"^RulesSource:[ \t]*" + re.escape(OFFICIAL_SOURCE) + r"[ \t]*$", text, re.M):
+                update(args.project_root)
+            else:
+                bundle = load_release_bundle()
+                sync_styles(args.project_root, bundle, apply=False)
+                apply_payload(args.project_root, bundle["COMMON_RULES.md"], args.accept_local_replacement)
+                sync_styles(args.project_root, bundle, apply=True)
+                print("ArtStyles verified and synchronized from the same release.")
     except Exception as error:
         print("Rules update failed; existing local rules retained: " + str(error), file=sys.stderr)
         return 1

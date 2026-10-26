@@ -38,3 +38,8 @@
 - COMMON_RULES.md的「美術生成與組裝」是獨立通用根章節，適用跨專案的Codex美術任務，不綁任何展示或畫風。維護時同步README入口，保留專案專用設定。
 - 若本次授權包含Codex全域入口，發布並回讀成功後，將同版美術章節同步到目前CODEX_HOME/AGENTS.md的受管理區塊，保留區塊外內容；未有配置的遠端／其他電腦不假定已生效。不要改寫內建生圖技能。
 - 新專案的AGENTS.md須指向同一RulesSource並要求讀本節；只有專案建立／規範配置已獲授權時才接入，不藉讀規則更動無關專案。
+## 個人風格庫維護
+
+- ArtStyles 是本庫的正式風格資料來源，與 COMMON_RULES.md 一起版本化發布；不在各專案維護多份分歧風格。使用者已授權的風格與通用美術規範更新，須在該任務完成 GitHub／Release／回讀與專案同步；不等同背景檔案監看。
+- 修改 ArtStyles 任一檔時更新 manifest 的雜湊與 libraryVersion，並提升 RulesVersion。公開內容不得有私人路徑、專案角色設定或未獲再散布授權的原始商業遊戲截圖。新增可發布圖片時一併定義來源、權利與校驗下載流程，不能只上傳描述就聲稱圖片已同步。
+- Release 額外包含 ArtStyles_manifest.json 與 manifest 所列的 STYLE-nnn.md；SHA256SUMS 涵蓋所有下載檔。UpdateRules.py 同步至入口同層 ArtStyles，保護本機風格改動，不刪除額外本機檔案。

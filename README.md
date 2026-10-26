@@ -82,3 +82,9 @@ python UpdateRules.py --workspace-root <工作區根> --sync-updater --apply
 首次接軌的未知基線須先人工／AI逐項比對；核對後可提供本機 JSON：`{"專案絕對路徑":{"rulesSha256":"正規化雜湊","updaterSha256":"正規化雜湊"}}`，用 `--reviewed-baselines <本機清單>`，僅接受完全相符的內容。這不是忽略衝突；清單與私人路徑不要提交。後續有正式同步基線時不需這個參數。
 
 使用者已授權整個工作區同步後，每次共同規範維護發布都包含以上預覽、套用及回讀，不重問已知範圍；目前仍不符合或受阻的專案會明列。
+
+## 個人美術風格庫
+
+先讀 [ArtStyles/manifest.json](ArtStyles/manifest.json)，再讀 [風格1 紙境工坊](ArtStyles/STYLE-001.md) 或 [風格2 清線冒險](ArtStyles/STYLE-002.md)。角色畫法、可替換元素、密度及試繪流程均在獨立風格檔。圖片可用性與來源狀態見索引；目前商業遊戲原截圖僅本機保存，未上傳。
+
+同一 Release 會發布 ArtStyles_manifest.json 及各風格 .md，既有更新器會校驗並同步到各專案 ArtStyles。新工作對話沿用原本更新命令。風格檔更新須連同版本、發布及已授權專案同步完成，尚未安裝背景自動上傳服務。

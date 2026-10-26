@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # madaimnim 遊戲開發通用 AI 協作與資料管理規範
 
-RulesVersion: 2026-10-26.4
+RulesVersion: 2026-10-26.5
 
 ## 適用與維護
 
@@ -48,6 +48,16 @@ RulesVersion: 2026-10-26.4
 - 正式來源為本儲存庫COMMON_RULES.md本節；各專案透過RulesSource取得同版副本。專案PROJECT_RULES.md只記風格決策、素材位置、命名、目標尺寸與已確認例外，不另外維護一份分歧的通用規則。
 - Codex使用者層級AGENTS.md應提供本節的核心要求與正式來源，使尚無專案規範的新任務也有入口。新機、不同CODEX_HOME及獨立雲端環境須另行配置並驗證，不宣稱GitHub上傳就會自動安裝到所有Codex環境。
 - 授權初始化新專案時，將RulesSource、RulesMaintenance及開始前更新／閱讀COMMON_RULES.md的要求接入專案AGENTS.md；保留既有入口。僅查詢或分析不自動建立／改寫專案規範。
+
+### 個人風格資料庫、來源與持續同步
+
+- 正式風格索引為本儲存庫 `ArtStyles/manifest.json`，獨立風格描述為 `ArtStyles/STYLE-001.md`、`ArtStyles/STYLE-002.md`。來源：https://github.com/Madaimnim/madaimnim-game-framework/tree/main/ArtStyles 。「風格2／風格二／STYLE-2／STYLE-002／清線冒險」指 STYLE-002；以索引解析其他編號，不只憑聊天記憶。
+- 專案的讀取路徑為規範入口同層的 `ArtStyles/manifest.json` 與對應 `.md`；正式下載來自與 COMMON_RULES.md 相同 Release tag 的 ArtStyles_manifest.json、STYLE-001.md、STYLE-002.md，由同一 UpdateRules.py 校驗 SHA256SUMS 後同步。參考圖片的來源、雜湊與可公開狀態記於索引；機器專用路徑只記本機 local-references.json／PROJECT_RULES.md，不寫死於公開規範。
+- 新工作對話執行既有更新器後，涉及已存風格時實際讀索引、風格檔與可取得的圖片。角色參考與畫法參考分清；元素、題材和版型按本次用途替換，不能把一次分格試圖、黃銅、紙張或某主角固定為該風格全部內容。
+- 缺原參考圖時如實記錄僅依文字試繪；不能把文字檔同步成功稱為圖片已同步或風格已驗證。缺圖不影響無關任務；高度一致性要求應先取得可讀參考。
+- 使用者已授權本個人風格庫的持續 GitHub 同步：此後新增或實質更新風格描述、來源紀錄、可發布素材與通用美術規範，須在同次工作完成相關檔案比對、公開內容檢查、測試、版本更新、提交、推送、Release、回讀及已授權專案同步。此授權限該風格庫與共用規範，不包含其他專案角色、程式或內部成果。一次保存失敗必須報告待同步，不將本機保存當成已上傳。
+- 更新器保護本機修改，風格副本不原地分歧維護；修改須回到來源後發布。此為 AI 執行任務時的完成條件，沒有安裝背景監看或保證人工離線修改會自動上傳。共用規範的維護與版本策略仍依本庫 AGENTS.md。
+- 公開來源只放可發布內容：私人路徑、角色專案設定與未確認再散布權利的原圖留在本機或核准的私有來源。GitHub 不可達時保留本機已校驗副本並明示版本；新機／雲端配置下載及圖片存取後再驗證。
 
 ### 先分析參考，再定生成條件
 
