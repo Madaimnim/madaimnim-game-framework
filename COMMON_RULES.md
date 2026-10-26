@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # madaimnim 遊戲開發通用 AI 協作與資料管理規範
 
-RulesVersion: 2026-10-26.2
+RulesVersion: 2026-10-26.3
 
 ## 適用與維護
 
@@ -71,6 +71,7 @@ RulesVersion: 2026-10-26.2
 - 只有與既有名稱可能重複、容易混淆，或確有必要區分用途時，才增加最少的限定詞，如ButtonGlow、TextGlow；先查同範圍名稱，不預先加長名稱。
 - 展示、試作、驗證用途的Scene統一採Demo_前綴，例如Demo_Glow.unity、Demo_Water.unity；不用GlowDemo或Demo後綴。Demo_是用途前綴，不計入效果名的一至兩個單字。正式產品場景不因使用特效就加Demo_。
 - 效果名、效果資料夾名與展示Scene的Demo_後名稱一致；畫面效果標題沿用同一英文短名，說明與操作依專案語系顯示。
+- Scene的Hierarchy統一保留英文結構名稱，標準物件使用Camera、Canvas、EventSystem；不要為中文顯示而改名。Canvas下以獨立且用途清楚的Panel父物件區分各展示項目，如PreviewPanel、SettingsPanel；其他子物件採簡短英文。畫面文案與Hierarchy名稱分開管理，文案依專案語系。世界空間效果保留原座標空間，必要分組不強塞Canvas；新增父物件須保持位置、縮放、顯示順序與事件引用。
 - 新增命名立即遵循；既有改名須在已授權的整理範圍內處理，先核對引用、保留.meta／GUID、更新工具／清單／文件並驗證。規則變更本身不代表已完成所有既有資產更名，不為改外觀任意重命名類別或破壞序列化。
 ### 組裝與重用
 
