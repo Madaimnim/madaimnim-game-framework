@@ -88,3 +88,7 @@ python UpdateRules.py --workspace-root <工作區根> --sync-updater --apply
 先讀 [ArtStyles/manifest.json](ArtStyles/manifest.json)，再讀 [風格1 紙境工坊](ArtStyles/STYLE-001.md) 或 [風格2 清線冒險](ArtStyles/STYLE-002.md)。角色畫法、可替換元素、密度及試繪流程均在獨立風格檔。圖片可用性與來源狀態見索引；目前商業遊戲原截圖僅本機保存，未上傳。
 
 同一 Release 會發布 ArtStyles_manifest.json 及各風格 .md，既有更新器會校驗並同步到各專案 ArtStyles。新工作對話沿用原本更新命令。風格檔更新須連同版本、發布及已授權專案同步完成，尚未安裝背景自動上傳服務。
+
+## 跨專案角色參考入口
+
+使用者授權的最少來源定位隨 [COMMON_RULES.md「跨專案角色參考定位」](COMMON_RULES.md#跨專案角色參考定位) 一起發布與同步。目前登記 The Far Veil 的雷雅／蕾雅／Rhea，指向角色專案內的唯一基準文件及 Player_V3.aseprite；不公開原圖、角色設定或本機磁碟路徑。其他對話須讀取新版，新裝置仍需接上角色專案；索引同步不代表圖片已上傳或所有對話即時更新。
