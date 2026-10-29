@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # madaimnim 遊戲開發通用 AI 協作與資料管理規範
 
-RulesVersion: 2026-10-29.4
+RulesVersion: 2026-10-29.5
 
 ## 適用與維護
 
