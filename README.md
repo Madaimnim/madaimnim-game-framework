@@ -100,3 +100,7 @@ python UpdateRules.py --workspace-root <工作區根> --sync-updater --apply
 ## 淺層交付與內容版本
 
 常用成品直接放 Builds；平台、渠道、GM 以短檔名辨別，不堆疊分類層。內容版本 V1／V2 由使用者確認，重打不自動升版；內部追蹤另記，舊包依授權集中歷史版本。完整規則見 COMMON_RULES.md「資料與資料夾」及「建置與版本」，同步規範不等於既有工具已改造。
+
+## 舊美術資產留存
+
+已替換或淘汰的舊圖依 COMMON_RULES.md「舊美術資產移出與留存」，移到工作區 SourceMaterial/舊資產／日期／原相對路徑，保留必要 .meta；先查既有安排，不直接刪除或攤放根層。
