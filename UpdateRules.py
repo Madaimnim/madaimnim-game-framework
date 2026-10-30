@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-UPDATER_VERSION = "2026-10-26.5"
+UPDATER_VERSION = "2026-10-30.3"
 LIMIT = 262144
 MARKER = "<!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->"
 
@@ -45,7 +45,15 @@ def baseline(root):
     top = git(root, "rev-parse", "--show-toplevel")
     directory = git(root, "rev-parse", "--absolute-git-dir")
     if not top or Path(top).resolve() != root or not directory:
-        return None, None
+        if not (root / ".shared-rules-root").is_file():
+            return None, None
+        state = root / ".shared-rules-baseline.json"
+        if not state.exists():
+            return state, None
+        value = json.loads(state.read_text(encoding="utf-8")).get("normalizedSha256")
+        if not isinstance(value, str) or not re.fullmatch(r"[a-f0-9]{64}", value):
+            raise ValueError("Invalid shared cache baseline")
+        return state, value
     state = Path(directory) / "madaimnim-common-rules.json"
     if state.exists():
         report = json.loads(state.read_text(encoding="utf-8"))
@@ -378,46 +386,172 @@ def batch_update(workspace, bundle, apply=False, sync_updater=False, reviewed_ba
     return {"workspace": str(workspace), "version": version, "apply": apply,
             "normalizedSha256": digest(text), "projects": results}
 
+
+POINTER_MARKER = "<!-- MADAIMNIM_SHARED_RULES_POINTER -->"
+POINTER_TEXT = POINTER_MARKER + """
+# 共用規範入口（不保存正文）
+
+RulesSource: https://github.com/Madaimnim/madaimnim-game-framework/releases/latest/download/COMMON_RULES.md
+
+本機只有一份共用正文。新工作對話執行 `python Tools/UpdateRules.py`，檢查正式GitHub Release並按需要更新共用正文；依輸出路徑完整閱讀。只查位置可執行 `python Tools/UpdateRules.py --show-location`。本檔不是規範副本，不在此新增通用條文。
+專案僅在PROJECT_RULES.md保存本案識別、實際來源／入口、必要例外及待辦。共用規範修改須回正式維護來源完成測試、提交、推送、Release與回讀；正常檢查更新不自行發布遊戲或無關變更。
+"""
+
+
+def central_location(explicit=None):
+    if explicit:
+        return Path(explicit).expanduser().resolve()
+    home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
+    config = home / "shared-rules.json"
+    if config.exists():
+        value = json.loads(config.read_text(encoding="utf-8-sig")).get("root")
+        if not isinstance(value, str) or not Path(value).is_absolute():
+            raise ValueError("Invalid shared-rules.json root; absolute local path required")
+        return Path(value).resolve(strict=True)
+    return (home / "shared-rules").resolve()
+
+
+def sync_central(root, bundle):
+    root = Path(root).resolve()
+    if root.exists() and is_link(root):
+        raise ValueError("Linked shared-rules directory; preserved")
+    # Validate the complete style bundle before any write.
+    style_files(bundle)
+    root.mkdir(parents=True, exist_ok=True)
+    sync_styles(root, bundle, apply=False)
+    if not git(root, "rev-parse", "--absolute-git-dir"):
+        (root / ".shared-rules-root").touch(exist_ok=True)
+    if not (root / "AGENTS.md").exists():
+        (root / "AGENTS.md").write_bytes(bundle["AGENTS.md"])
+    changed = apply_payload(root, bundle["COMMON_RULES.md"])
+    sync_styles(root, bundle, apply=True)
+    return changed
+
+
+def migrate_project_pointer(project, bundle, central, apply=False, sync_updater=True, reviewed=None):
+    reviewed = reviewed or {}
+    project = Path(project).resolve(strict=True)
+    central = Path(central).resolve(strict=True)
+    if project == central:
+        return {"project": str(project), "status": "central", "rulesPath": str(central / "COMMON_RULES.md")}
+    entry = project / "AGENTS.md"
+    if not entry.exists() or not re.search(r"^RulesSource:[ \t]*" + re.escape(OFFICIAL_SOURCE) + r"[ \t]*$", entry.read_text(encoding="utf-8-sig"), re.M):
+        raise ValueError("Official RulesSource missing; project preserved")
+    target = project / "COMMON_RULES.md"
+    pointer = target.exists() and target.read_text(encoding="utf-8-sig").startswith(POINTER_MARKER)
+    if target.exists() and is_link(target):
+        raise ValueError("Linked project rules; preserved")
+    if pointer and target.read_text(encoding="utf-8-sig").replace("\r\n", "\n") != POINTER_TEXT:
+        raise ValueError("Modified pointer; preserved for review")
+    if target.exists() and not pointer:
+        text, version, order = normalized(target.read_bytes())
+        remote, remote_version, remote_order = normalized(bundle["COMMON_RULES.md"])
+        _, known = baseline(project)
+        if order > remote_order or (order == remote_order and text != remote):
+            raise ValueError("Newer or same-version conflicting local rules; preserve and merge")
+        if text != remote and digest(text) != known and reviewed.get("rulesSha256") != digest(text):
+            raise ValueError("Local rules differ from known baseline; preserve and merge")
+    tool = project / "Tools/UpdateRules.py"
+    if tool.parent.exists() and is_link(tool.parent):
+        raise ValueError("Linked Tools directory; preserved")
+    new_tool = bundle["UpdateRules.py"].decode("utf-8-sig").replace("\r\n", "\n")
+    tool_changed = not tool.exists() or tool.read_text(encoding="utf-8-sig").replace("\r\n", "\n") != new_tool
+    if tool.exists() and is_link(tool):
+        raise ValueError("Linked updater; preserved")
+    if tool.exists() and tool_changed:
+        local_tool = tool.read_text(encoding="utf-8-sig").replace("\r\n", "\n")
+        original = git(project, "show", "HEAD:Tools/UpdateRules.py")
+        state, _ = baseline(project)
+        known_file = state.parent / "madaimnim-updater.json" if state else None
+        known_tool = json.loads(known_file.read_text(encoding="utf-8")).get("normalizedSha256") if known_file and known_file.exists() else None
+        if (original is None or original.rstrip() != local_tool.rstrip()) and known_tool != digest(local_tool.rstrip() + "\n"):
+            raise ValueError("Modified or untracked updater; preserve for review")
+    if tool_changed and not sync_updater:
+        raise ValueError("Central pointer requires updated tool; use --sync-updater")
+    # Preflight above is complete before either file changes. Replace tool first:
+    # interruption leaves a working old copy with a central-aware updater, never the reverse.
+    if apply:
+        if tool_changed:
+            tool.parent.mkdir(exist_ok=True)
+            temporary = tool.with_name(".UpdateRules.central.tmp")
+            with temporary.open("xb") as stream:
+                stream.write(bundle["UpdateRules.py"])
+            os.replace(temporary, tool)
+        if not pointer:
+            temporary = target.with_name(".COMMON_RULES.central.tmp")
+            with temporary.open("x", encoding="utf-8", newline="\n") as stream:
+                stream.write(POINTER_TEXT)
+            os.replace(temporary, target)
+        state, _ = baseline(project)
+        if state:
+            (state.parent / "madaimnim-updater.json").write_text(json.dumps({"normalizedSha256": digest(new_tool.rstrip() + "\n")}), encoding="utf-8")
+        if target.read_text(encoding="utf-8-sig") != POINTER_TEXT:
+            raise ValueError("Pointer readback failed")
+    changed = not pointer or tool_changed
+    return {"project": str(project), "status": ("updated" if apply else "would_update") if changed else "current",
+            "rulesPath": str(central / "COMMON_RULES.md"), "projectBodyRemoved": not pointer,
+            "updaterChanged": tool_changed, "readbackVerified": bool(apply)}
+
+
+def central_workspace(workspace, bundle, central, apply=False, sync_updater=True, reviews=None):
+    reviews = reviews or {}
+    results = []
+    for project in discover_projects(workspace):
+        try:
+            results.append(migrate_project_pointer(project, bundle, central, apply, sync_updater, reviews.get(str(Path(project).resolve()))))
+        except Exception as error:
+            results.append({"project": str(project), "status": "blocked", "reason": str(error)})
+    return {"workspace": str(Path(workspace).resolve()), "version": normalized(bundle["COMMON_RULES.md"])[1],
+            "apply": apply, "central": str(central), "projects": results}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--version", action="version", version=UPDATER_VERSION)
-    parser.add_argument("--workspace-root", type=Path, help="Discover all configured projects; preview unless --apply")
-    parser.add_argument("--apply", action="store_true", help="Apply the workspace preview without forcing conflicts")
-    parser.add_argument("--reviewed-baselines", type=Path, help="Explicit per-project SHA256 review manifest for first-time legacy migration; never a blanket force")
-    parser.add_argument("--sync-updater", action="store_true", help="Also update unchanged tracked project updaters from the same release")
+    parser.add_argument("--central-root", type=Path, help="Single machine-local shared rules location")
+    parser.add_argument("--show-location", action="store_true", help="Print body path without claiming remote freshness")
+    parser.add_argument("--workspace-root", type=Path, help="Preview pointer migration of configured projects")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--sync-updater", action="store_true")
     parser.add_argument("--project-root", type=Path, default=Path(__file__).resolve().parent.parent)
+    # Retained for explicit source diagnostics; target is always the central body.
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--source-uri")
     group.add_argument("--source-path", type=Path)
-    parser.add_argument("--accept-local-replacement", action="store_true", help="Only after reviewing and preserving local changes")
+    parser.add_argument("--accept-local-replacement", action="store_true")
+    parser.add_argument("--reviewed-baselines", type=Path)
     args = parser.parse_args()
     try:
-        if args.workspace_root:
-            if args.source_uri or args.source_path or args.accept_local_replacement:
-                raise ValueError("Workspace mode only accepts the verified official release, without forced replacement")
-            reviews = json.loads(args.reviewed_baselines.read_text(encoding="utf-8")) if args.reviewed_baselines else None
-            report = batch_update(args.workspace_root, load_release_bundle(), args.apply, args.sync_updater, reviews)
-            print(json.dumps(report, ensure_ascii=False, indent=2))
-            return 1 if not report["projects"] or any(p["status"] == "blocked" for p in report["projects"]) else 0
-        if args.apply or args.sync_updater or args.reviewed_baselines:
-            raise ValueError("--apply and --sync-updater require --workspace-root")
+        central = central_location(args.central_root)
+        if args.show_location:
+            print(central / "COMMON_RULES.md")
+            return 0
         if args.source_uri or args.source_path:
-            update(args.project_root, args.source_uri, args.source_path, args.accept_local_replacement)
+            if args.workspace_root or args.apply:
+                raise ValueError("Explicit source is for central diagnostics, not workspace migration")
+            update(central, args.source_uri, args.source_path, args.accept_local_replacement)
         else:
-            entry = args.project_root / "AGENTS.md"
-            text = entry.read_text(encoding="utf-8-sig")
-            if not re.search(r"^RulesSource:[ \t]*" + re.escape(OFFICIAL_SOURCE) + r"[ \t]*$", text, re.M):
-                update(args.project_root)
-            else:
-                bundle = load_release_bundle()
-                sync_styles(args.project_root, bundle, apply=False)
-                apply_payload(args.project_root, bundle["COMMON_RULES.md"], args.accept_local_replacement)
-                sync_styles(args.project_root, bundle, apply=True)
-                print("ArtStyles verified and synchronized from the same release.")
+            if args.accept_local_replacement:
+                raise ValueError("No forced pointer migration; compare conflicting sources first")
+            bundle = load_release_bundle()
+            sync_central(central, bundle)
+            if args.workspace_root:
+                reviews = json.loads(args.reviewed_baselines.read_text(encoding="utf-8")) if args.reviewed_baselines else None
+                report = central_workspace(args.workspace_root, bundle, central, args.apply, args.sync_updater, reviews)
+                print(json.dumps(report, ensure_ascii=False, indent=2))
+                return 1 if not report["projects"] or any(p["status"] == "blocked" for p in report["projects"]) else 0
+            if args.apply or args.sync_updater:
+                raise ValueError("Migration flags require --workspace-root")
+            print("Shared rules verified against GitHub release. Read: " + str(central / "COMMON_RULES.md"))
+        return 0
     except Exception as error:
-        print("Rules update failed; existing local rules retained: " + str(error), file=sys.stderr)
+        print("Shared rules not updated; local content preserved: " + str(error), file=sys.stderr)
+        try:
+            if (central / "COMMON_RULES.md").exists():
+                print("Available local body (freshness not verified): " + str(central / "COMMON_RULES.md"), file=sys.stderr)
+        except Exception:
+            pass
         return 1
-    return 0
 
 
 if __name__ == "__main__":

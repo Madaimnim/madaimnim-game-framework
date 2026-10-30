@@ -1,106 +1,31 @@
-# madaimnim game framework
+# 共用規範唯一入口
 
-跨專案共用規範及同步工具。遊戲專用設定、帳密與成果文件留在各自專案。
+正式維護來源為本GitHub儲存庫；各環境只保留一份COMMON_RULES.md正文。先讀AGENTS.md的維護／發布流程，通用條文見COMMON_RULES.md，不在遊戲專案維護副本。
 
-## 美術生成與組裝
+## 開始工作
 
-統一規則位於 [COMMON_RULES.md「美術生成與組裝」](COMMON_RULES.md#美術生成與組裝)，涵蓋參考分析、生成素材、裝飾與留白、組裝重用、需拉伸UI的九宮格預設、實際驗收與AI感修正；新增／調整圖片時依「圖片新增／調整的必查流程」檢查素材、渲染遮擋、點擊互動、切換／播放、保存重載與主專案交付；依影響範圍驗證，不以編譯或狀態文字更新代替實際可見性。不限特定專案或畫風。各專案沿用同一RulesSource與更新器即可讀到，不另複製一份永久規則。
+每個新工作對話從專案根執行 `python Tools/UpdateRules.py`。更新器比對GitHub正式Release與SHA256SUMS，本機落後才下載至共用位置，相同不重寫；依輸出路徑完整閱讀正文。僅查位置用 `--show-location`，不代表已驗證遠端最新。來源衝突或網路失敗保留內容並報錯，不能假稱已同步。
 
-要讓尚無專案規範的新任務也套用，須在該執行環境的Codex使用者層級AGENTS.md配置本節核心要求及本來源。可將本節以有版本標記的區塊同步至全域入口；正式維護來源仍只有本儲存庫。新機／不同CODEX_HOME／雲端須另外配置，不能只上傳GitHub就宣稱所有環境生效。專案初始化時再接入RulesSource／RulesMaintenance與既有Tools/UpdateRules.py，不覆蓋專案專用內容。
-## 維護共用內容
+## 本機位置與換機
 
-先讀 [AGENTS.md](AGENTS.md) 及 [COMMON_RULES.md](COMMON_RULES.md)。使用者明確要求維護共用規範時，依入口完成比對、測試、提交、推送、Release 與回讀驗證；一般專案下載不觸發發布。
+機器專用位置記在CODEX_HOME/shared-rules.json：`{"root":"<本機共用目錄的絕對路徑>"}`，不提交私人設定。未配置的新環境預設使用CODEX_HOME/shared-rules（CODEX_HOME未指定時為使用者家目錄/.codex）；工具會從已校驗的Release初始化必要檔案。換機需要Python3.8以上及GitHub連線，讀取前實際驗證，不能假定另一台電腦已安裝。
 
-- 主分支：維護來源。
-- GitHub Release：各專案正式下載來源。
-- `.github/workflows/publish-rules.yml`：主分支規範／工具變更後，自動測試及發布不可覆寫的版本化 Release。
-- 只推送不等於完成：需等發布成功，核對 latest 下載內容、雜湊及來源提交。
+各專案COMMON_RULES.md僅為短指標，AGENTS.md及更新工具保持可攜；PROJECT_RULES.md只保存本案識別、資料／場景／工具入口、特有契約、例外與待辦。共用風格由唯一正文旁ArtStyles讀取，實際參考圖另依私有映射取得。
 
-## 專案入口
+## 修改與發布
 
-專案 Git 根目錄的 AGENTS.md 保留自己的專案指引，加入以下來源及維護入口；不要讓下載器覆蓋整份專案入口。
+使用者要求維護通用規範時，依AGENTS.md核對遠端及本機修改，合併、測試、升RulesVersion與風格manifest版本、提交／推送；主分支workflow發布不可覆寫的rules-版本。回讀Release對應提交、內容及雜湊後才稱完成。正常工作檢查更新不自動提交遊戲或無關檔案。共用規範維護已獲授權的內容不能只停留本機。
 
-```text
-RulesSource: https://github.com/Madaimnim/madaimnim-game-framework/releases/latest/download/COMMON_RULES.md
-RulesMaintenance: https://github.com/Madaimnim/madaimnim-game-framework/blob/main/AGENTS.md
-```
+## 舊專案轉為短入口
 
-將 Release 的 UpdateRules.py 放在專案既有 `Tools/UpdateRules.py`，新工作對話開始檢查一次：
-
-```text
-python ./Tools/UpdateRules.py
-```
-
-更新後完整閱讀 COMMON_RULES.md；目前對話不反覆下載。維護規範任務另先讀上述共用維護入口。
-
-## 工具升級與保護
-
-Release 提供 COMMON_RULES.md、UpdateRules.py、AGENTS.md、SHA256SUMS.txt。舊工具沒有 `--version` 時，取得同一 Release 的工具、核對 checksum 後原地更新，並保留原命令列入口。版本與工具升級規則詳見 AGENTS.md。
-
-新工具保護降版、同版不同內容及本機未發布修改。同步基線僅存於本機 Git 目錄，不提交；非 Git 專案或無法判定基線時，不自動覆蓋已存在且內容不同的檔案。明確核對並保留差異後才使用 `--accept-local-replacement`。
-
-```text
-python ./Tools/UpdateRules.py --source-path <已核對的共用來源>
-python ./Tools/UpdateRules.py --version
-```
+從共用維護目錄執行 `python UpdateRules.py --workspace-root <工作區> --sync-updater` 預覽，再加 `--apply`。依已登記授權處理；一致或已校驗基線才替換舊正文，先更新工具再寫指標。未知／修改／同版衝突保留，不用強制覆寫；手動比對後可給限定雜湊的--reviewed-baselines。回讀每個入口解析到同一正文，不搬資產、不提交遊戲Git。
 
 ## 測試
 
-```text
-python -m unittest discover -s tests -v
-```
+`python -m unittest discover -s tests -v`
 
-檢查涵蓋首次同步、不重寫相同內容、格式與來源限制、拒絕降版、同版衝突、本機修改保護及 Git 同步基線。離線測試不代表 Release 已發布；發布後仍需實際回讀。
+保留既有下載／降版／本機修改與風格校驗回歸，另驗證唯一正文、初次初始化、指標遷移預覽／衝突／重複執行與私人位置配置。
 
-## 新作品沿用同一套架構
+## 索引
 
-COMMON_RULES.md 的「跨作品共用架構與 AI 實作契約」是正式標準，包含模組責任、唯一文字來源、可編輯 UI、模板盤點與驗證。這是架構／實作規範，並非已交付可執行的遊戲程式模板。
-
-新專案 AGENTS.md 在保留作品入口的前提下，加入上方 RulesSource／RulesMaintenance，要求先執行 Tools/UpdateRules.py 並完整閱讀 COMMON_RULES.md、PROJECT_RULES.md；不要另複製一份永久分岔的文字規則。
-
-PROJECT_RULES.md 維護以下現行資訊（不要只留歷史流水帳）：
-
-- 程式模板來源與 commit、引擎／套件、產品識別及內容根。
-- 功能／正式來源／編輯入口／執行讀取者／產物與驗證／差異或待辦的架構表。
-- 固定 UI 的 Table Collection、Entry 命名與語系；劇情／字幕的作者資料與編譯入口。
-- Scene／Prefab、字型與圖片、平台／存檔、建置入口與輸出政策。
-- 確認過的基底能力、未驗收／舊版殘留與遷移缺口，不能把規範當成已完成實作。
-
-已定義的來源與分工由 AI 主動核對，不再每次要求使用者重複確認；仍未知或與本次需求有實質衝突者才提出具體問題。
-
-## 一次同步工作區所有專案
-
-使用同一個正式更新器，不另建第二套批次工具。從共用維護 checkout 執行：
-
-```text
-python UpdateRules.py --workspace-root <工作區根> --sync-updater
-python UpdateRules.py --workspace-root <工作區根> --sync-updater --apply
-```
-
-第一行只預覽；第二行寫入。探索會依正式 RulesSource 找入口，支援外層 Git 根管理內層 Unity 根。固定下載同一 Release 並核對 checksum；不更動遊戲內容與專案專屬規範，不清除快取、不跟隨連結。updated/current/blocked 逐案回報，有受阻項目退出非零。
-
-首次接軌的未知基線須先人工／AI逐項比對；核對後可提供本機 JSON：`{"專案絕對路徑":{"rulesSha256":"正規化雜湊","updaterSha256":"正規化雜湊"}}`，用 `--reviewed-baselines <本機清單>`，僅接受完全相符的內容。這不是忽略衝突；清單與私人路徑不要提交。後續有正式同步基線時不需這個參數。
-
-使用者已授權整個工作區同步後，每次共同規範維護發布都包含以上預覽、套用及回讀，不重問已知範圍；目前仍不符合或受阻的專案會明列。
-
-## 個人美術風格庫
-
-先讀 [ArtStyles/manifest.json](ArtStyles/manifest.json)，再讀 [風格1 紙境工坊](ArtStyles/STYLE-001.md) 或 [風格2 清線冒險](ArtStyles/STYLE-002.md)。角色畫法、可替換元素、密度及試繪流程均在獨立風格檔。圖片可用性與來源狀態見索引；目前商業遊戲原截圖僅本機保存，未上傳。
-
-同一 Release 會發布 ArtStyles_manifest.json 及各風格 .md，既有更新器會校驗並同步到各專案 ArtStyles。新工作對話沿用原本更新命令。風格檔更新須連同版本、發布及已授權專案同步完成，尚未安裝背景自動上傳服務。
-
-## 跨專案角色參考入口
-
-使用者授權的最少來源定位隨 [COMMON_RULES.md「跨專案角色參考定位」](COMMON_RULES.md#跨專案角色參考定位) 一起發布與同步。目前登記 The Far Veil 的雷雅／蕾雅／Rhea，指向角色專案內的唯一基準文件及 Player_V3.aseprite；不公開原圖、角色設定或本機磁碟路徑。其他對話須讀取新版，新裝置仍需接上角色專案；索引同步不代表圖片已上傳或所有對話即時更新。
-
-## 工作文件與成果報告
-
-依 COMMON_RULES.md 的用途分類：專案工作區根的 `成果報告/` 保存正式成果摘要與開發改善紀錄；平行的 `工作文件/` 保存人工工作過程需要的對照表、清單、方案與操作／驗證紀錄。美術來源、長期技術文件、正式工具與 AI 測試暫存各沿用其既有位置。同步規範不會自動搬動既有文件。
-
-## 淺層交付與內容版本
-
-常用成品直接放 Builds；平台、渠道、GM 以短檔名辨別，不堆疊分類層。內容版本 V1／V2 由使用者確認，重打不自動升版；內部追蹤另記，舊包依授權集中歷史版本。完整規則見 COMMON_RULES.md「資料與資料夾」及「建置與版本」，同步規範不等於既有工具已改造。
-
-## 舊美術資產留存
-
-已替換或淘汰的舊圖依 COMMON_RULES.md「舊美術資產移出與留存」，移到工作區 SourceMaterial/舊資產／日期／原相對路徑，保留必要 .meta；先查既有安排，不直接刪除或攤放根層。
+通用規範涵蓋權限、資料歸屬與舊美術日期留存、美術生成／圖片None與九宮格、Unity/UI結構、文字唯一來源、內容版本／淺層Builds、證據與成果文件。個人風格索引在ArtStyles/manifest.json；跨專案角色只保存已授權最小定位，不發布私人原圖或設定。登記工作區與本機映射只記本機Git私有狀態。
