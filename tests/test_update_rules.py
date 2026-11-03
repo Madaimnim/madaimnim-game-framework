@@ -201,9 +201,10 @@ class ArtStyleSynchronizationTests(WorkspaceUpdateTests):
         target.write_text('local style edit')
         before=(root/'COMMON_RULES.md').read_bytes()
         report=u.batch_update(self.workspace,self.style_bundle(b'# Third style\n','2026-10-26.7'),apply=True)
-        self.assertEqual(report['projects'][0]['status'],'blocked')
+        self.assertEqual(report['projects'][0]['status'],'updated')
+        self.assertFalse(report['projects'][0]['stylesChanged'])
         self.assertEqual(target.read_text(),'local style edit')
-        self.assertEqual((root/'COMMON_RULES.md').read_bytes(),before)
+        self.assertNotEqual((root/'COMMON_RULES.md').read_bytes(),before)
 
     def test_style_hash_and_path_validation_precede_writes(self):
         root=self.project('invalid');bundle=self.style_bundle()
@@ -232,5 +233,6 @@ class ArtStyleSynchronizationTests(WorkspaceUpdateTests):
         root=self.project('style-report','2026-10-26.5');bundle=self.style_bundle()
         (root/'COMMON_RULES.md').write_bytes(bundle['COMMON_RULES.md'])
         report=u.batch_update(self.workspace,bundle,apply=True)
-        self.assertEqual(report['projects'][0]['status'],'updated')
-        self.assertTrue(report['projects'][0]['stylesChanged'])
+        self.assertEqual(report['projects'][0]['status'],'current')
+        self.assertFalse(report['projects'][0]['stylesChanged'])
+        self.assertFalse((root/'ArtStyles').exists())

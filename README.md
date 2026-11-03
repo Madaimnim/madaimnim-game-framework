@@ -10,7 +10,7 @@
 
 機器專用位置記在CODEX_HOME/shared-rules.json：`{"root":"<本機共用目錄的絕對路徑>"}`，不提交私人設定。未配置的新環境預設使用CODEX_HOME/shared-rules（CODEX_HOME未指定時為使用者家目錄/.codex）；工具會從已校驗的Release初始化必要檔案。換機需要Python3.8以上及GitHub連線，讀取前實際驗證，不能假定另一台電腦已安裝。
 
-各專案COMMON_RULES.md僅為短指標，AGENTS.md及更新工具保持可攜；PROJECT_RULES.md只保存本案識別、資料／場景／工具入口、特有契約、例外與待辦。共用風格由唯一正文旁ArtStyles讀取，實際參考圖另依私有映射取得。
+各專案COMMON_RULES.md僅為短指標，AGENTS.md及更新工具保持可攜；PROJECT_RULES.md只保存本案識別、資料／場景／工具入口、特有契約、例外與待辦。個人風格庫僅由COMMON_RULES第9節提供按需參考入口；一般規範同步不下載、不派送到遊戲專案，明確需要時才取用所需風格。
 
 ## 修改與發布
 

@@ -42,3 +42,47 @@ class CentralRulesTests(unittest.TestCase):
   self.init();p=self.project();u.migrate_project_pointer(p,self.bundle,self.center,True);before=(p/'COMMON_RULES.md').read_bytes()
   with patch.object(u.sys,'argv',['UpdateRules.py','--central-root',str(self.center),'--project-root',str(p)]),patch.object(u,'load_release_bundle',return_value=self.bundle) as remote,contextlib.redirect_stdout(io.StringIO()):self.assertEqual(u.main(),0);remote.assert_called_once()
   self.assertEqual(before,(p/'COMMON_RULES.md').read_bytes())
+
+
+class OnDemandStyleTests(unittest.TestCase):
+ def bundle(self):
+  import hashlib
+  styles={"STYLE-001.md":b"# style one", "STYLE-002.md":b"# style two"}
+  manifest={"schemaVersion":1,"styles":[{"id":k[:-3],"file":k,"sha256":hashlib.sha256(v).hexdigest()} for k,v in styles.items()]}
+  return {"COMMON_RULES.md":rules(),"UpdateRules.py":b"# updater","AGENTS.md":b"# maintenance","ArtStyles_manifest.json":json.dumps(manifest).encode(),**styles}
+ def test_default_sync_never_installs_styles_even_if_bundle_contains_them(self):
+  with tempfile.TemporaryDirectory() as directory:
+   with contextlib.redirect_stdout(io.StringIO()):u.sync_central(Path(directory),self.bundle())
+   self.assertFalse((Path(directory)/"ArtStyles").exists())
+ def test_explicit_style_only_installs_requested_description(self):
+  with tempfile.TemporaryDirectory() as directory:
+   root=Path(directory)
+   with contextlib.redirect_stdout(io.StringIO()):u.sync_central(root,self.bundle(),style_ids=["STYLE-002"])
+   self.assertTrue((root/"ArtStyles/STYLE-002.md").is_file())
+   self.assertFalse((root/"ArtStyles/STYLE-001.md").exists())
+ def test_default_network_fetch_does_not_request_style_assets(self):
+  import hashlib
+  bundle=self.bundle();requests=[]
+  checks="".join(hashlib.sha256(v).hexdigest()+"  "+k+"\n" for k,v in bundle.items()).encode()
+  class Response(io.BytesIO):
+   def geturl(self):return "https://github.com/verified"
+  def download(url,timeout=30):
+   requests.append(url)
+   if url.endswith("/releases/latest"):return Response(json.dumps({"tag_name":"rules-2026-10-30.3"}).encode())
+   name=url.rsplit("/",1)[-1]
+   return Response(checks if name=="SHA256SUMS.txt" else bundle[name])
+  with patch.object(u,"urlopen",side_effect=download):
+   result=u.load_release_bundle()
+  self.assertNotIn("ArtStyles_manifest.json",result)
+  self.assertFalse(any("ArtStyles" in x or "STYLE-" in x for x in requests))
+  self.assertIn("AGENTS.md",result)
+  requests.clear()
+  with patch.object(u,"urlopen",side_effect=download):result=u.load_release_bundle(style_ids=["STYLE-002"])
+  self.assertIn("STYLE-002.md",result)
+  self.assertNotIn("STYLE-001.md",result)
+  self.assertFalse(any("STYLE-001.md" in x for x in requests))
+ def test_invalid_explicit_style_preserves_existing_cache(self):
+  with tempfile.TemporaryDirectory() as directory:
+   root=Path(directory)
+   with self.assertRaises(ValueError):u.sync_central(root,self.bundle(),style_ids=["STYLE-999"])
+   self.assertFalse((root/"COMMON_RULES.md").exists())

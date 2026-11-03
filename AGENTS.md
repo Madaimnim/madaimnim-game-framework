@@ -24,7 +24,7 @@
 ## 下載、唯一正文與專案入口
 
 - 各專案保留短指標，不保留全文；依自己的 AGENTS.md 在新對話開始執行一次 Tools/UpdateRules.py；遠端失敗保留唯一本機正文並明示未驗證最新，不阻塞無關工作。
-- 工具只更新唯一共用COMMON_RULES.md、必要風格資源及本機同步基線；不自動覆蓋專案 AGENTS.md／PROJECT_RULES.md，不修改遊戲或自行提交。
+- 工具預設只更新唯一共用COMMON_RULES.md及本機同步基線；個人風格庫只依COMMON_RULES入口於需要時明確取用；不自動覆蓋專案 AGENTS.md／PROJECT_RULES.md，不修改遊戲或自行提交。
 - 使用本文對應版本的 UpdateRules.py。舊工具未提供 UpdaterVersion、降版／同版衝突及本機修改保護時，由 AI 從同一 Release 取得工具並比對 SHA256SUMS，確認符合現有入口後更新專案既有 Tools/UpdateRules.py；不額外建立第二個更新器。
 - 比對內容與版本：相同內容則不重寫；遠端較舊或同版內容不同則阻擋；本機偏離已同步基線／Git HEAD 則阻擋自動覆蓋。必要時先分析及合併回共用來源並發布，再經明確的 --accept-local-replacement 更新本機副本，不能以該選項掩蓋未核對變更。
 - 發布後依已登記的使用者工作區授權執行全專案同步：UpdateRules.py --workspace-root <工作區根> --sync-updater 先預覽，再加 --apply 套用；共用正文回讀版本／SHA-256，每案核對指向同一路徑，列出受阻項目。沒有全專案授權時僅同步目前專案，其他專案維持各自下次工作更新。已登記的全工作區授權不逐次重問；私人路徑只記在本機 .git/rules-workspaces.json 或相關專案 PROJECT_RULES.md。
@@ -42,7 +42,7 @@
 
 - ArtStyles 是本庫的正式風格資料來源，與 COMMON_RULES.md 一起版本化發布；不在各專案維護多份分歧風格。使用者已授權的風格與通用美術規範更新，須在該任務完成 GitHub／Release／回讀與專案同步；不等同背景檔案監看。
 - 修改 ArtStyles 任一檔時更新 manifest 的雜湊與 libraryVersion，並提升 RulesVersion。公開內容不得有私人路徑、專案角色設定或未獲再散布授權的原始商業遊戲截圖。新增可發布圖片時一併定義來源、權利與校驗下載流程，不能只上傳描述就聲稱圖片已同步。
-- Release 額外包含 ArtStyles_manifest.json 與 manifest 所列的 STYLE-nnn.md；SHA256SUMS 涵蓋所有下載檔。UpdateRules.py 同步至唯一正文同層 ArtStyles，保護本機風格改動，不刪除額外本機檔案。
+- Release 額外包含 ArtStyles_manifest.json 與 manifest 所列的 STYLE-nnn.md；SHA256SUMS 涵蓋所有下載檔。一般UpdateRules.py不下載風格資源；只有明確的--style請求才將所需風格放至唯一共用快取，保護本機改動。專案入口不保存個人風格索引／描述；具體取用入口只維護在COMMON_RULES。
 
 ## 已授權的跨專案角色定位
 

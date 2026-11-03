@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-UPDATER_VERSION = "2026-10-30.3"
+UPDATER_VERSION = "2026-11-03.2"
 LIMIT = 262144
 MARKER = "<!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->"
 
@@ -174,7 +174,7 @@ def discover_projects(workspace):
     return found
 
 
-def load_release_bundle():
+def load_release_bundle(style_ids=None):
     """Resolve latest once; all downloads then use the same immutable release tag."""
     with urlopen("https://api.github.com/repos/Madaimnim/madaimnim-game-framework/releases/latest", timeout=30) as response:
         release = json.load(response)
@@ -197,18 +197,26 @@ def load_release_bundle():
             raise ValueError("Invalid release checksum")
         checks[name] = value
     bundle = {}
-    for name in ("COMMON_RULES.md", "UpdateRules.py"):
+    for name in ("COMMON_RULES.md", "UpdateRules.py", "AGENTS.md"):
         data = read(name)
         if hashlib.sha256(data).hexdigest() != checks.get(name):
             raise ValueError("Release checksum mismatch: " + name)
         bundle[name] = data
-    if "ArtStyles_manifest.json" in checks:
+    if style_ids:
+        if "ArtStyles_manifest.json" not in checks:
+            raise ValueError("Requested art styles unavailable in this release")
         data = read("ArtStyles_manifest.json")
         if hashlib.sha256(data).hexdigest() != checks["ArtStyles_manifest.json"]:
             raise ValueError("Release style manifest checksum mismatch")
         bundle["ArtStyles_manifest.json"] = data
         manifest = json.loads(data.decode("utf-8"))
+        requested = set(style_ids)
+        available = {entry.get("id") for entry in manifest.get("styles", [])}
+        if requested - available:
+            raise ValueError("Unknown requested art style: " + ", ".join(sorted(requested - available)))
         for entry in manifest.get("styles", []):
+            if entry.get("id") not in requested:
+                continue
             name = entry.get("file", "")
             if not re.fullmatch(r"STYLE-[0-9]{3}\.md", name):
                 raise ValueError("Unsafe release style filename")
@@ -216,7 +224,7 @@ def load_release_bundle():
             if hashlib.sha256(data).hexdigest() != checks.get(name):
                 raise ValueError("Release style checksum mismatch: " + name)
             bundle[name] = data
-        style_files(bundle)
+        style_files(bundle, style_ids)
     _, version, _ = normalized(bundle["COMMON_RULES.md"])
     if tag != "rules-" + version:
         raise ValueError("Release tag and rules version differ")
@@ -224,7 +232,7 @@ def load_release_bundle():
 
 
 
-def style_files(bundle):
+def style_files(bundle, style_ids=None):
     """Validate the complete text-only style bundle before any destination write."""
     if "ArtStyles_manifest.json" not in bundle:
         return {}
@@ -239,17 +247,21 @@ def style_files(bundle):
         if not re.fullmatch(r"STYLE-[0-9]{3}", identity) or name != identity + ".md" or identity in identities:
             raise ValueError("Unsafe or duplicate style identity/path")
         identities.add(identity)
+        if style_ids is not None and identity not in style_ids:
+            continue
         data = bundle.get(name)
         if data is None or len(data) > LIMIT or hashlib.sha256(data).hexdigest() != entry.get("sha256"):
             raise ValueError("Missing or mismatched style content: " + name)
         data.decode("utf-8")
         files[name] = data
+    if style_ids is not None and set(style_ids) - identities:
+        raise ValueError("Unknown requested art style")
     return files
 
 
-def sync_styles(root, bundle, apply=False):
+def sync_styles(root, bundle, apply=False, style_ids=None):
     """Preserve local edits and extra files; never follow destination links."""
-    files = style_files(bundle)
+    files = style_files(bundle, style_ids)
     if not files:
         return False
     root = Path(root).resolve(strict=True)
@@ -292,7 +304,8 @@ def sync_styles(root, bundle, apply=False):
         for name, data in files.items():
             if (directory / name).read_bytes() != data:
                 raise ValueError("Style readback mismatch: " + name)
-        state_path.write_text(json.dumps({name: hashlib.sha256(data).hexdigest() for name, data in files.items()}, indent=2), encoding="utf-8")
+        known.update({name: hashlib.sha256(data).hexdigest() for name, data in files.items()})
+        state_path.write_text(json.dumps(known, indent=2), encoding="utf-8")
     return bool(changed)
 
 
@@ -352,7 +365,7 @@ def batch_update(workspace, bundle, apply=False, sync_updater=False, reviewed_ba
                             raise ValueError("Modified or untracked updater; manual comparison required")
                 else:
                     tool_changed = True
-            styles_changed = sync_styles(root, bundle, apply=False)
+            styles_changed = False  # General workspace updates never distribute personal styles.
             if apply:
                 with contextlib.redirect_stdout(io.StringIO()):
                     apply_payload(root, bundle["COMMON_RULES.md"], accept_local_replacement=reviewed_rules)
@@ -370,7 +383,6 @@ def batch_update(workspace, bundle, apply=False, sync_updater=False, reviewed_ba
                             temporary.unlink()
                 if sync_updater and tool_state:
                     tool_state.write_text(json.dumps({"normalizedSha256": digest(bundle["UpdateRules.py"].decode("utf-8-sig").replace("\r\n", "\n").rstrip() + "\n")}, indent=2), encoding="utf-8")
-                sync_styles(root, bundle, apply=True)
                 result["status"] = "updated" if changed or tool_changed or styles_changed else "current"
                 if normalized(target.read_bytes())[0] != text:
                     raise ValueError("Readback mismatch")
@@ -411,20 +423,23 @@ def central_location(explicit=None):
     return (home / "shared-rules").resolve()
 
 
-def sync_central(root, bundle):
+def sync_central(root, bundle, style_ids=None):
     root = Path(root).resolve()
     if root.exists() and is_link(root):
         raise ValueError("Linked shared-rules directory; preserved")
-    # Validate the complete style bundle before any write.
-    style_files(bundle)
+    # Art styles are fetched only by an explicit task request, never by normal rule updates.
+    if style_ids:
+        style_files(bundle, style_ids)
     root.mkdir(parents=True, exist_ok=True)
-    sync_styles(root, bundle, apply=False)
+    if style_ids:
+        sync_styles(root, bundle, apply=False, style_ids=style_ids)
     if not git(root, "rev-parse", "--absolute-git-dir"):
         (root / ".shared-rules-root").touch(exist_ok=True)
     if not (root / "AGENTS.md").exists():
         (root / "AGENTS.md").write_bytes(bundle["AGENTS.md"])
     changed = apply_payload(root, bundle["COMMON_RULES.md"])
-    sync_styles(root, bundle, apply=True)
+    if style_ids:
+        sync_styles(root, bundle, apply=True, style_ids=style_ids)
     return changed
 
 
@@ -507,6 +522,7 @@ def central_workspace(workspace, bundle, central, apply=False, sync_updater=True
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--style", action="append", metavar="STYLE-nnn", help="Fetch only the explicitly needed personal style to the shared cache; repeat for multiple styles")
     parser.add_argument("--version", action="version", version=UPDATER_VERSION)
     parser.add_argument("--central-root", type=Path, help="Single machine-local shared rules location")
     parser.add_argument("--show-location", action="store_true", help="Print body path without claiming remote freshness")
@@ -522,6 +538,10 @@ def main():
     parser.add_argument("--reviewed-baselines", type=Path)
     args = parser.parse_args()
     try:
+        if args.style and (args.workspace_root or args.source_uri or args.source_path or args.show_location):
+            raise ValueError("--style is an explicit on-demand fetch, not a workspace migration or diagnostic")
+        if args.style and any(not re.fullmatch(r"STYLE-[0-9]{3}", item) for item in args.style):
+            raise ValueError("Use a canonical style ID such as STYLE-002")
         central = central_location(args.central_root)
         if args.show_location:
             print(central / "COMMON_RULES.md")
@@ -533,8 +553,11 @@ def main():
         else:
             if args.accept_local_replacement:
                 raise ValueError("No forced pointer migration; compare conflicting sources first")
-            bundle = load_release_bundle()
-            sync_central(central, bundle)
+            bundle = load_release_bundle(style_ids=args.style) if args.style else load_release_bundle()
+            if args.style:
+                sync_central(central, bundle, style_ids=args.style)
+            else:
+                sync_central(central, bundle)
             if args.workspace_root:
                 reviews = json.loads(args.reviewed_baselines.read_text(encoding="utf-8")) if args.reviewed_baselines else None
                 report = central_workspace(args.workspace_root, bundle, central, args.apply, args.sync_updater, reviews)
