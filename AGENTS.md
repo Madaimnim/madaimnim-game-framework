@@ -47,3 +47,8 @@
 ## 已授權的跨專案角色定位
 
 COMMON_RULES.md 可保存使用者明確授權公開的最少角色來源索引（別名、專案相對入口／資產路徑、查找用途與限制）。此例外僅針對定位中繼資料，不包含角色設定、原圖、遊戲成果、私人絕對路徑或自動上傳角色專案。維護定位仍完成升版、測試、發布、回讀及已登記工作區同步；換機需另外配置角色專案存取。使用者層級入口只引用本正式來源，保留本機私有映射。
+
+## 共用資料庫分工
+
+- COMMON_RULES第9節是四類資料庫唯一導覽與獲取規則；ArtStyles保存美術條目，MusicAudio保存音樂音效條目。新增或修改MusicAudio時同步其manifest雜湊／libraryVersion、ArtStyles的libraryVersion與RulesVersion，Release包含MusicAudio_manifest.json及索引列出的MUSIC-nnn／SFX-nnn.md並納入SHA256SUMS。
+- UnityEffects與The Far Veil角色基準維持獨立原來源；導覽整理不授權上傳其未提交內容或私人素材。各庫原始資產／權限／驗收與規範文字發布分開確認。

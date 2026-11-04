@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "libraryVersion": "2026-11-04.1",
+  "libraryVersion": "2026-11-04.2",
   "styles": [
     {
       "id": "STYLE-001",
@@ -13,7 +13,7 @@
         "紙境工坊"
       ],
       "file": "STYLE-001.md",
-      "sha256": "42d173bf33a6c1501f4e0bfbd8f2f2393e637a9bc4541da12bb84db0e4ec85d1",
+      "sha256": "2467629c55dc982349ddcb2d91829ef74a9d13672a7a08ca941eb60be6118f94",
       "reference": {
         "kind": "user-provided commercial-game screenshot",
         "sha256": "08a6d46cc22018814bb86ce51968e9038688dae2b6ba9b6703527f7da7e69046",
@@ -32,7 +32,7 @@
         "清線冒險"
       ],
       "file": "STYLE-002.md",
-      "sha256": "5b7a7776e38a07f7672038b7bbb55682e1af42a70167fe774a135c41fdc4b2c6",
+      "sha256": "6472df0b459437b64d6c43159a96df5adbf0dab17de1575be806699a9ea640e6",
       "reference": {
         "kind": "user-provided commercial-game screenshot",
         "sha256": "a4b0276bd1d24d45b58c4d2885c3b1cb6965e96198602032efaa2e5c85aced0d",

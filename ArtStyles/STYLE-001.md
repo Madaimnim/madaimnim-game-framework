@@ -3,7 +3,7 @@
 ## 跨專案引用與執行
 
 - ID：STYLE-001；名稱：紙境工坊；別名：風格1、風格 1、風格一。
-- 正式來源：本儲存庫 `ArtStyles/STYLE-001.md`；專案透過同版 Release 與 `Tools/UpdateRules.py` 同步至 `ArtStyles/STYLE-001.md`。編號固定，檔名不隨中文名稱改變。
+- 正式來源：本儲存庫 `ArtStyles/STYLE-001.md`；專案明確需要時透過同版 Release 與 `Tools/UpdateRules.py --style STYLE-001` 按需取至唯一共用root的 `ArtStyles/STYLE-001.md`，不派送至遊戲專案。編號固定，檔名不隨中文名稱改變。
 - 先讀目標專案規範，再讀本檔；實際查看角色母圖及風格參考圖。角色母圖提供身分和服裝，本檔提供畫法；不能直接套用參考角色的身分、配色、版型或裝備。
 - 缺少明確用途時先以一張角色概念試圖探索。缺角色來源且無法從專案確認時取得來源，不憑空聲稱還原。參考素材清單見 `manifest.json`；本機路徑由本機風格庫 `local-references.json` 或專案 `PROJECT_RULES.md` 提供。
 - 原商業遊戲截圖僅在本機保存，尚無公開再散布授權，未隨 Release 上傳。若無法讀到圖，明示「僅依文字規格試繪，未做原參考圖視覺核對」，需要高度還原時先取得圖片；不宣稱已驗證一致。

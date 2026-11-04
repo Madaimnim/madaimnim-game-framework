@@ -7,6 +7,7 @@ on:
       - UpdateRules.py
       - AGENTS.md
       - ArtStyles/**
+      - MusicAudio/**
       - tests/**
       - .github/workflows/publish-rules.yml
 permissions:
@@ -48,6 +49,15 @@ jobs:
               if not re.fullmatch(r'STYLE-[0-9]{3}\.md',name):raise SystemExit('Unsafe style path')
               data=Path('ArtStyles',name).read_bytes()
               if hashlib.sha256(data).hexdigest()!=entry['sha256']:raise SystemExit('Style hash mismatch')
+              Path(name).write_bytes(data);assets.append(name)
+          music=json.loads(Path('MusicAudio/manifest.json').read_text(encoding='utf-8'))
+          if music['libraryVersion']!=version:raise SystemExit('Music/rules version mismatch')
+          Path('MusicAudio_manifest.json').write_bytes(Path('MusicAudio/manifest.json').read_bytes());assets.append('MusicAudio_manifest.json')
+          for entry in music['entries']:
+              name=entry['file']
+              if not re.fullmatch(r'(MUSIC|SFX)-[0-9]{3}\.md',name):raise SystemExit('Unsafe music/audio path')
+              data=Path('MusicAudio',name).read_bytes()
+              if hashlib.sha256(data).hexdigest()!=entry['sha256']:raise SystemExit('Music/audio hash mismatch')
               Path(name).write_bytes(data);assets.append(name)
           Path('SHA256SUMS.txt').write_text(''.join(hashlib.sha256(Path(p).read_bytes()).hexdigest()+'  '+p+'\n' for p in assets),encoding='utf-8')
           release=request(api+'/releases',{'tag_name':'rules-'+version,'target_commitish':sha,'name':'Shared rules '+version,'body':'Shared rules and guarded updater. Source commit: '+sha,'draft':True,'prerelease':False},'POST')

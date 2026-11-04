@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "libraryVersion": "2026-11-04.2",
+  "entries": [
+    {
+      "id": "MUSIC-001",
+      "name": "JRPG 探索與旅行",
+      "kind": "music-reference",
+      "aliases": [
+        "音樂風格1",
+        "凱爾特音樂",
+        "Celtic Folk",
+        "Celtic Ambient",
+        "JRPG Orchestral Folk"
+      ],
+      "file": "MUSIC-001.md",
+      "sha256": "da33292075103cf9630b3b1fbe9c5554a9e6d2f2aba4ec41e6d3e1ab79eec45e",
+      "availability": "text reference only; no audio files; sound effect entries not yet registered"
+    }
+  ]
+}
