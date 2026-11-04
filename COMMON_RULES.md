@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # 跨專案通用規範
 
-RulesVersion: 2026-11-04.3
+RulesVersion: 2026-11-04.4
 
 本機只保留這一份正文；各專案使用短入口。依任務讀完整適用內容，不能把索引或摘要當已讀正文。
 
@@ -284,6 +284,14 @@ RulesVersion: 2026-11-04.3
 - NoPlatform／DevBypass 類版本明示測試用途，不標為正式平台驗證版。
 - 建置紀錄應能追溯版本、Commit、未提交修改與結果；Git 未追蹤的素材、外部依賴與環境不能假定可還原，重建也不能保證與舊包完全相同。
 - 不自行建立長期玩法、UI 或功能分歧；需要維護不同版本時依使用者決策採設定或版本策略。
+
+### Android 共用正式簽章
+
+- 使用者已指定後續 Android 遊戲沿用同一把共用正式簽章金鑰；不同遊戲仍使用各自的 package name。此為 Android 簽章身分，不代替平台 SDK 的 access_key／game_key，也不適用 Windows EXE 的 Authenticode 憑證。
+- 打包前讀取 `GAME_ANDROID_SIGNING_CONFIG` 指定的設定；未指定時讀取使用者家目錄的 `.game-signing/android.json`。這是跨專案的本機定位入口；實際金鑰路徑、alias、金鑰及憑證 SHA-256、密碼提供方式與私有備份位置只保存在本機設定／專案私有交接紀錄，不寫入公開規範。新機須先還原既有金鑰並配置密碼，找不到不可自行生成另一把或默默退回 debug 簽章。
+- Unity 沿既有 Editor／建置入口讀取上述設定，明確套用 custom keystore、alias 與密碼；其他引擎使用對應簽章工具。核對金鑰雜湊，成品建置後驗證 APK 簽章憑證與預期身分一致。僅保存設定不等於成品已使用，規範發布不代表其他既有專案已接入。
+- 私鑰檔放在遊戲專案外；不得加入 Assets、Resources、StreamingAssets、APK、公開 Git 或建置 Log。經使用者授權可把有強密碼保護的 keystore 備份到已確認為 private 的儲存庫，並回讀校驗；密碼與解密材料分開保管，不隨金鑰上傳。Windows DPAPI 密碼檔只供原機原使用者使用，換機須另行安全配置。
+- 同一 package name 的更新須維持相容簽章；由 debug 換正式金鑰、金鑰輪替或平台重新簽章前，先核對既有分發包及平台要求，說明更新相容性與存檔影響。不得僅以「可卸載重裝」當成正式更新驗收，已有正式使用者的作品不自動換鍵。
 
 ## 8. 工作成果文件
 
