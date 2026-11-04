@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # 跨專案通用規範
 
-RulesVersion: 2026-11-04.2
+RulesVersion: 2026-11-04.3
 
 本機只保留這一份正文；各專案使用短入口。依任務讀完整適用內容，不能把索引或摘要當已讀正文。
 

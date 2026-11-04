@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "libraryVersion": "2026-11-04.2",
+  "libraryVersion": "2026-11-04.3",
   "entries": [
     {
       "id": "MUSIC-001",
@@ -14,7 +14,7 @@
         "JRPG Orchestral Folk"
       ],
       "file": "MUSIC-001.md",
-      "sha256": "da33292075103cf9630b3b1fbe9c5554a9e6d2f2aba4ec41e6d3e1ab79eec45e",
+      "sha256": "e13b0a62cfe5fa8552e5469ae1f27a00c9f0bcb74b6a25f25062e8126d5b24f6",
       "availability": "text reference only; no audio files; sound effect entries not yet registered"
     }
   ]
