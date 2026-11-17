@@ -50,6 +50,12 @@ jobs:
               data=Path('ArtStyles',name).read_bytes()
               if hashlib.sha256(data).hexdigest()!=entry['sha256']:raise SystemExit('Style hash mismatch')
               Path(name).write_bytes(data);assets.append(name)
+              for attachment in entry.get('attachments', []):
+                  asset_name=attachment['file']
+                  if not re.fullmatch(re.escape(Path(name).stem)+r'-[a-z0-9-]+\.(gif|png)',asset_name) or asset_name in assets:raise SystemExit('Unsafe or duplicate style attachment')
+                  blob=Path('ArtStyles',asset_name).read_bytes()
+                  if hashlib.sha256(blob).hexdigest()!=attachment['sha256']:raise SystemExit('Style attachment hash mismatch')
+                  Path(asset_name).write_bytes(blob);assets.append(asset_name)
           music=json.loads(Path('MusicAudio/manifest.json').read_text(encoding='utf-8'))
           if music['libraryVersion']!=version:raise SystemExit('Music/rules version mismatch')
           Path('MusicAudio_manifest.json').write_bytes(Path('MusicAudio/manifest.json').read_bytes());assets.append('MusicAudio_manifest.json')

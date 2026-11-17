@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # 跨專案通用規範
 
-RulesVersion: 2026-11-16.1
+RulesVersion: 2026-11-17.1
 
 本機只保留這一份正文；各專案使用短入口。依任務讀完整適用內容，不能把索引或摘要當已讀正文。
 
@@ -371,11 +371,11 @@ RulesVersion: 2026-11-16.1
 ### 共用資料庫統一入口
 
 - 使用者說「共用資料庫」時，先讀本節總表，再依用途前往對應唯一來源；不是某一個本機素材資料夾，也不是要求將各庫整包複製到遊戲。各專案只保留共用規範入口，不各自另建資料庫總表或分歧副本。
-- 共用規範仍只有本文件一本正文，負責規則、導覽與獲取方式；具體風格／音樂內容由對應庫維護。美術只設一個庫，STYLE-001、STYLE-002是庫內條目，不是兩個資料庫；音樂與音效同屬一庫，尚無音效條目不預造空分類。
+- 共用規範仍只有本文件一本正文，負責規則、導覽與獲取方式；具體風格／音樂內容由對應庫維護。美術只設一個庫，各 STYLE 條目都在同一個庫，不是兩個資料庫；音樂與音效同屬一庫，尚無音效條目不預造空分類。
 
 | 共用資料庫 | 正式入口／內容 | 獲取方式與界線 |
 |---|---|---|
-| 共用美術資料庫 | 本儲存庫 `ArtStyles/manifest.json`；STYLE-001「紙境工坊」、STYLE-002「清線冒險」 | 按下節既有 `--style STYLE-nnn` 取得同版Release所需描述與校驗；原圖依私有映射實讀。 |
+| 共用美術資料庫 | 本儲存庫 `ArtStyles/manifest.json`；STYLE-001「紙境工坊」、STYLE-002「清線冒險」、STYLE-003「2D 敵人少幀動畫風格比較」 | 按下節既有 `--style STYLE-nnn` 取得同版Release所需描述與校驗；原圖依私有映射實讀。 |
 | 共用音樂音效資料庫 | 本儲存庫 `MusicAudio/manifest.json`；目前 MUSIC-001「JRPG探索與旅行」，只有文字參考 | 按「共用音樂音效資料庫」節取得同版Release的索引與條目並校驗，不自動下載音樂包。 |
 | Unity特效資料庫 | 獨立 GitHub 儲存庫 https://github.com/Madaimnim/UnityEffects ；先讀其 AGENTS、README、PROJECT_RULES | 有存取權時讀遠端或 clone 至使用者指定位置；有既有 checkout 先檢查本機修改／遠端差異，不自動 pull 覆蓋。按庫內現行來源與依賴取用。 |
 | The Far Veil角色基準 | 已連接 The Far Veil 專案的 `Assets/Documentation/TheFarVeil_PlayerCharacterBaseline.md` | 先依本機專案映射定位並讀原文，再讀指定圖像／Aseprite；共用規範僅保存最少定位，不複製角色設定或原圖。 |
@@ -393,12 +393,14 @@ RulesVersion: 2026-11-16.1
 
 ### 共用美術資料庫（個人風格庫）
 
-- 正式索引為本庫 `ArtStyles/manifest.json`，風格描述為 `ArtStyles/STYLE-001.md`、`STYLE-002.md`；來源：https://github.com/Madaimnim/madaimnim-game-framework/tree/main/ArtStyles 。「風格2／風格二／STYLE-2／STYLE-002／清線冒險」均指STYLE-002，其他編號也以索引解析，不憑聊天記憶。
+- 正式索引為本庫 `ArtStyles/manifest.json`，條目描述為索引所列的 `ArtStyles/STYLE-nnn.md`；來源：https://github.com/Madaimnim/madaimnim-game-framework/tree/main/ArtStyles 。「風格2／風格二／STYLE-2／STYLE-002／清線冒險」均指STYLE-002，其他編號也以索引解析，不憑聊天記憶。
 - 個人風格庫的參考入口只維護於本節；各工作／遊戲專案不複製風格索引或描述，也不在AGENTS另設個人風格庫入口。一般規範更新、初始化、專案搬移及全工作區同步不下載或派送ArtStyles；未使用此個人庫的工作專案不預先安裝。只有當次任務明確使用已保存風格時，才由共用更新器執行 `python Tools/UpdateRules.py --style STYLE-002`（按實際ID替換），從同版Release取得索引及所需描述、校驗雜湊，保存至唯一共用位置的按需快取；不下載其他風格或放入遊戲專案。已有且校驗一致的內容可重用，原始參考圖沿私有映射按需讀取；不改動個人風格庫正式來源。
 - 新對話依一般流程更新規範即可；涉及已存畫風時才按上述入口取用，實際讀索引、對應描述及可取得圖片。角色參考與畫法分開；題材、元素、版型按本次用途替換，不把分格、黃銅、紙張或某主角固定為全部風格。
 - 缺圖須明示僅依文字試繪；文字同步不等於圖片同步／風格驗證。缺圖不阻塞無關任務，高一致性用途先取得可讀參考；新機／雲端須配置圖片存取。
 - 使用者已授權此個人風格庫及通用美術規範的持續GitHub同步：新增或實質更新描述、來源、可發布素材及規範，同次完成比對、公開內容檢查、測試、升版、提交、推送、Release、回讀及已授權入口同步。此授權不含其他專案角色、程式或內部成果；不可公開的原圖／設定留私有來源，失敗明示待同步。
 - 修改回正式來源，不在副本分歧維護；流程依維護AGENTS。沒有背景監看或人工離線修改自動上傳保證，GitHub不可達時保留已校驗本機版並明示版本。
+
+公開比較素材可由對應風格條目連結手動取得。Release 附件以同版 SHA256SUMS 與風格 manifest 比對。既有 --style 入口仍按需取得文字描述。
 
 ### Unity特效庫
 

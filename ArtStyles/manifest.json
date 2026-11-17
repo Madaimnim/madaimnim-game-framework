@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "libraryVersion": "2026-11-16.1",
+  "libraryVersion": "2026-11-17.1",
   "styles": [
     {
       "id": "STYLE-001",
@@ -39,6 +39,33 @@
         "availability": "local-only; redistribution permission unconfirmed",
         "sourceUrl": null
       }
+    },
+    {
+      "id": "STYLE-003",
+      "name": "2D 敵人少幀動畫風格比較",
+      "aliases": [
+        "十三種畫風比較",
+        "少幀敵人動畫",
+        "苔甲獨角蟲"
+      ],
+      "file": "STYLE-003.md",
+      "sha256": "ef77345833681c0fa3af16c95844e52153645349f1e79d8b3746f9fe5e78a754",
+      "reference": {
+        "kind": "original AI-generated comparison",
+        "sha256": "57e7a2f3420df687aa0ce0b6380a6ac65b47e225f8e7f7b13aedc1be38e052a3",
+        "availability": "public GitHub and versioned Release",
+        "sourceUrl": "https://github.com/Madaimnim/madaimnim-game-framework/releases/download/rules-2026-11-17.1/STYLE-003-comparison.gif"
+      },
+      "attachments": [
+        {
+          "file": "STYLE-003-comparison.gif",
+          "sha256": "57e7a2f3420df687aa0ce0b6380a6ac65b47e225f8e7f7b13aedc1be38e052a3"
+        },
+        {
+          "file": "STYLE-003-comparison.png",
+          "sha256": "e7baf0ec1fb46f88d273d9031b0706729aa1eaac3cf4a9d4ce9c82b7446ccfc2"
+        }
+      ]
     }
   ]
 }
