@@ -44,6 +44,44 @@ class CentralRulesTests(unittest.TestCase):
   self.assertEqual(before,(p/'COMMON_RULES.md').read_bytes())
 
 
+class CommittedPointerTests(unittest.TestCase):
+    def test_committed_pointer_without_state_can_be_synced(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            project = root / "project"
+            project.mkdir()
+            (project / "AGENTS.md").write_text("RulesSource: " + u.OFFICIAL_SOURCE + "\n", encoding="utf-8")
+            (project / "COMMON_RULES.md").write_text(u.POINTER_TEXT, encoding="utf-8")
+            (project / "Tools").mkdir()
+            updater = b"# verified updater\n"
+            (project / "Tools/UpdateRules.py").write_bytes(updater)
+            git_directory = project / ".git"
+            git_directory.mkdir()
+            center = root / "shared"
+            center.mkdir()
+            bundle = {"COMMON_RULES.md": rules(), "UpdateRules.py": updater}
+
+            def git_result(path, *args):
+                if args == ("rev-parse", "--show-toplevel"):
+                    return str(project)
+                if args == ("rev-parse", "--absolute-git-dir"):
+                    return str(git_directory)
+                if args == ("show", "HEAD:COMMON_RULES.md"):
+                    return u.POINTER_TEXT.strip()
+                return None
+
+            with patch.object(u, "git", side_effect=git_result):
+                result = u.migrate_project_pointer(project, bundle, center, apply=True)
+            self.assertEqual(result["status"], "current")
+            self.assertTrue(result["readbackVerified"])
+            self.assertEqual((project / "COMMON_RULES.md").read_text(encoding="utf-8"), u.POINTER_TEXT)
+            self.assertTrue((git_directory / "madaimnim-updater.json").is_file())
+
+    def test_inaccessible_discovery_path_is_skipped(self):
+        with patch.object(Path, "stat", side_effect=FileNotFoundError("unreadable path")):
+            self.assertTrue(u.is_link(Path("unreadable")))
+
+
 class OnDemandStyleTests(unittest.TestCase):
  def bundle(self):
   import hashlib

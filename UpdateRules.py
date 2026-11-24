@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-UPDATER_VERSION = "2026-11-03.2"
+UPDATER_VERSION = "2026-11-24.2"
 LIMIT = 262144
 MARKER = "<!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->"
 
@@ -63,6 +63,8 @@ def baseline(root):
         return state, value
     original = git(root, "show", "HEAD:COMMON_RULES.md")
     if original:
+        if original.replace("\r\n", "\n").strip() == POINTER_TEXT.strip():
+            return state, None
         text, _, _ = normalized(original.encode("utf-8"))
         return state, digest(text)
     return state, None
@@ -142,7 +144,11 @@ SKIP_DIRECTORIES = {".git", ".svn", "Library", "Temp", "Logs", "obj", "node_modu
 
 
 def is_link(path):
-    return path.is_symlink() or bool(getattr(path.stat(follow_symlinks=False), "st_file_attributes", 0) & 0x400)
+    try:
+        return path.is_symlink() or bool(getattr(path.stat(follow_symlinks=False), "st_file_attributes", 0) & 0x400)
+    except OSError:
+        # Discovery cannot safely descend through an inaccessible path.
+        return True
 
 
 def discover_projects(workspace):
