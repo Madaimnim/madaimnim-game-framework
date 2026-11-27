@@ -52,3 +52,9 @@
 啟用專案的新對話先照常 UpdateRules.py，再執行 Tools/RulesSkills.py sync、core、project-core；依任務使用 read <module> 或 project-read <heading>。list 只列已安裝規範技能，完整可用技能以本次對話清單為準；列清單不讀全部正文。版本／雜湊不符或工具不可用時退回全文。
 
 RuleSkills.zip 與 RulesSkills.py 由同一不可變Release及SHA256SUMS校驗，sync保護未知／本機修改，僅更新已明確啟用專案的受管理技能檔。rollback預設預覽，--apply只回復已登記入口與技能；遇管理區塊或技能被另改時停止，保護無關筆記、遊戲程式、資產、成品與雲端。舊Release保留，既有對話已讀上下文不能回收，需新對話驗證。
+
+## 瘋玩自訂技能共用安裝
+
+10 個 cp-* 技能以「瘋玩｜用途」顯示，維持任務語意自動選擇。使用者層安裝讓同機不同專案可發現同一來源；不自動啟用其他專案按需閱讀，也不新增遊戲操作授權。
+
+先校驗同版 Release 的 UserRuleSkills.py、RulesSkills.py、RulesSkills.zip 及正文，再執行 `python UserRuleSkills.py sync` 預覽，加 `--apply` 安裝。預設 CODEX_HOME/skills（CODEX_HOME 未設定用 ~/.codex），保護未知／修改的同名檔；`rollback` 預覽，加 `--apply` 還原本工具所管理的檔案。私有安裝狀態留 CODEX_HOME，不進公開來源。顯示分類不宣稱介面支援資料夾；技能清單以每個對話實際可用項目為準。

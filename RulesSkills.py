@@ -42,7 +42,7 @@ def validate(text,version,m):
   if x["module"]!="catalog":read_module(text,m,x["module"])
  if not set(range(2,10)).issubset(covered):raise ValueError("Unrouted section")
 def safe(root,rel):
- if not (rel in {"Tools/RulesSkills.py","Tools/rules-skills-manifest.json","Tools/rules-skills-installed.json","Tools/rules-skill-pilot.json"} or re.fullmatch(r"\.agents/skills/cp-[a-z0-9-]+/SKILL\.md",rel)):raise ValueError("Not a managed skill path")
+ if not (rel in {"Tools/RulesSkills.py","Tools/rules-skills-manifest.json","Tools/rules-skills-installed.json","Tools/rules-skill-pilot.json"} or re.fullmatch(r"\.agents/skills/cp-[a-z0-9-]+/(?:SKILL\.md|agents/openai\.yaml)",rel)):raise ValueError("Not a managed skill path")
  p=PurePosixPath(rel)
  if p.is_absolute() or ".." in p.parts or "\\" in rel or ":" in rel:raise ValueError("Unsafe relative path")
  path=Path(root).joinpath(*p.parts)
@@ -112,9 +112,7 @@ def fetch(version):
  for name,b in assets.items():
   if sha(b)!=sums.get(name):raise ValueError("Release checksum mismatch")
  return assets
-def install(project,text,version,assets):
- config=json.loads((project/"Tools/rules-skill-pilot.json").read_text(encoding="utf-8"))
- if not config.get("enabled"):raise ValueError("Explicit opt-in required")
+def unpack(text,version,assets):
  contents={}
  with zipfile.ZipFile(io.BytesIO(assets["RulesSkills.zip"])) as z:
   if sum(x.file_size for x in z.infolist())>LIMIT:raise ValueError("Oversized expanded bundle")
@@ -129,7 +127,17 @@ def install(project,text,version,assets):
   rel=x["name"]+"/SKILL.md";data=contents.pop(rel)
   if sha(data)!=x["sha256"]:raise ValueError("Skill checksum mismatch")
   wanted[".agents/skills/"+rel]=data
+  if x.get("uiSha256"):
+   ui=x["name"]+"/agents/openai.yaml";data=contents.pop(ui)
+   if sha(data)!=x["uiSha256"]:raise ValueError("UI checksum mismatch")
+   wanted[".agents/skills/"+ui]=data
  if contents:raise ValueError("Unexpected bundle entry")
+ return m,wanted,blob
+def install(project,text,version,assets):
+ config=json.loads((project/"Tools/rules-skill-pilot.json").read_text(encoding="utf-8"))
+ if not config.get("enabled"):raise ValueError("Explicit opt-in required")
+ m,wanted,blob=unpack(text,version,assets)
+ if config.get("skillScope")=="user":wanted={}
  wanted["Tools/RulesSkills.py"]=assets["RulesSkills.py"];wanted["Tools/rules-skills-manifest.json"]=blob
  ledger_path=project/"Tools/rules-skills-installed.json"
  previous=json.loads(ledger_path.read_text(encoding="utf-8"))["files"] if ledger_path.exists() else {}
@@ -159,6 +167,9 @@ def install(project,text,version,assets):
  snap=snapshot_path(project)
  if snap.exists():
   state=json.loads(snap.read_text(encoding="utf-8"))
+  for rel in set(previous)-set(wanted):
+   # Removed owned discovery files must not block a later full pilot rollback.
+   state["afterFiles"].pop(rel,None)
   for rel,data in wanted.items():
    if rel not in state["originalFiles"]:state["originalFiles"][rel]=base64.b64encode(before[rel]).decode() if before.get(rel) is not None else None
    state["afterFiles"][rel]=sha(data)
@@ -193,7 +204,7 @@ def main():
    m=install(a.project_root,text,version,fetch(version));print("Verified rule skills installed: "+m["rulesVersion"]);return 0
   if m is None:raise ValueError("Rule skills not installed")
   validate(text,version,m)
-  if a.command=="list":print(json.dumps({"version":version,"scope":"installed shared-rule skills; check runtime available skills separately","skills":[{k:x[k] for k in ["name","module","description"]} for x in m["skills"]]},ensure_ascii=False,indent=2))
+  if a.command=="list":print(json.dumps({"version":version,"scope":"CrazyPlay shared-rule catalog; confirm user/project installation ledger and runtime availability","skills":[{k:x[k] for k in ["name","module","description","displayName"]} for x in m["skills"]]},ensure_ascii=False,indent=2))
   elif a.command=="core":ss=sections(text);print("RulesVersion: "+version+"\n"+ss[0]+ss[1])
   elif a.command=="read":print("RulesVersion: "+version+"\n"+read_module(text,m,a.module,a.heading))
   else:

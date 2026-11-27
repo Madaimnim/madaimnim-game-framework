@@ -56,3 +56,5 @@ COMMON_RULES.md 可保存使用者明確授權公開的最少角色來源索引�
 ## 按需規範 Skill 維護
 
 COMMON_RULES仍為唯一條款來源；RulesSkills.py只讀核心／適用章節、列目錄及管理明確啟用專案的版本化技能。RuleSkills內只維護發現描述與讀取路由，BuildRuleSkills.py產生同版manifest及確定性ZIP，不另存分歧條文。修改時保留完整正文相容、驗證條款覆蓋／雜湊／安裝衝突／還原，再與RulesVersion、兩個資源manifest版本一起發布；Release包含RulesSkills.py與RulesSkills.zip並納入SHA256SUMS。一般同步不自動啟用其他專案。試行啟用／還原基準留該專案本機Git私有狀態，不公開私人路徑或工作內容。
+
+瘋玩使用者層技能由 UserRuleSkills.py 預覽／明確套用／還原，同版 Release 校驗後才安裝。分類顯示與已啟用專案按需閱讀分開；遷移專案副本須檢查管理基線、保留專案工具／限制及還原能力，避免同名多份發現入口。發布包含 UserRuleSkills.py；不改內建技能或其他插件。

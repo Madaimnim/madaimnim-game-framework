@@ -5,6 +5,7 @@ on:
     paths:
       - COMMON_RULES.md
       - UpdateRules.py
+      - UserRuleSkills.py
       - RulesSkills.py
       - BuildRuleSkills.py
       - RuleSkills/**
@@ -47,7 +48,7 @@ jobs:
           if manifest['libraryVersion']!=version:raise SystemExit('Style/rules version mismatch')
           import BuildRuleSkills
           BuildRuleSkills.generate(check=True)
-          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md','RulesSkills.py','RulesSkills.zip','ArtStyles_manifest.json']
+          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md','RulesSkills.py','UserRuleSkills.py','RulesSkills.zip','ArtStyles_manifest.json']
           Path('ArtStyles_manifest.json').write_bytes(Path('ArtStyles/manifest.json').read_bytes())
           for entry in manifest['styles']:
               name=entry['file']

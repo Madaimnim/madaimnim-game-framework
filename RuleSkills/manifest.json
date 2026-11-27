@@ -1,101 +1,117 @@
 {
   "format": 1,
-  "rulesVersion": "2026-11-27.3",
-  "commonSha256": "4e0448e224ffb4c874ebd070cceb4f0ae2501de377b4b013c823aecad8ba8985",
-  "readerSha256": "7c6a658f29f7468238861c1cfc3d5b233b7d6ba307929aded458721fc829ab2a",
+  "rulesVersion": "2026-11-27.4",
+  "commonSha256": "a412045e1ce88c8d84c7266c2cbf07f7289ccdb5c9724248b02bce53efdc3ffd",
+  "readerSha256": "d271d398f34e99ae4f13c4f009819ca6a42d5bf7320c8c48028a2ebbc6fcf933",
   "skills": [
     {
       "module": "files",
       "name": "cp-files",
-      "description": "專案檔案歸屬、搬移、清理及舊美術留存；詢問功能不自動清理。",
+      "description": "瘋玩（CrazyPlay）共用技能：專案檔案歸屬、搬移、清理及舊美術留存；詢問功能不自動清理。",
       "selectors": [
         {
           "section": 2
         }
       ],
-      "sha256": "a4206fd1dd9bc6ec357c0b8b8c90f59b20e7d67c232f7b583a51346126fa9f93"
+      "displayName": "瘋玩｜檔案管理",
+      "sha256": "77f691e7250b97011093e961b129b56d2ec1ea6d89c8c6e3c789d699063aa3bc",
+      "uiSha256": "ac2197b359e58c81d742f159a5d608230d04b845d59cabf001488ab88f10063a"
     },
     {
       "module": "unity-ui",
       "name": "cp-unity-ui",
-      "description": "Unity 架構、場景、Prefab、固定 UI、版面與章節故事線工具修改。",
+      "description": "瘋玩（CrazyPlay）共用技能：Unity 架構、場景、Prefab、固定 UI、版面與章節故事線工具修改。",
       "selectors": [
         {
           "section": 3
         }
       ],
-      "sha256": "a99d5cc1f94691c5b27a3ffe8f8a7e210507171c95dc1c678ff107d7be9dcaba"
+      "displayName": "瘋玩｜Unity 與 UI",
+      "sha256": "292020692c50109ce945c2405cdca0309014c11f200cf6f25b92d9c7fc8d260f",
+      "uiSha256": "1b1902c5bcf9875ae239ef92ce8319bde085b2c46996737c94f4f7ccb477f873"
     },
     {
       "module": "art",
       "name": "cp-art",
-      "description": "遊戲圖片、美術、九宮格、比例與匯入設定；實際生圖搭配製作技能。",
+      "description": "瘋玩（CrazyPlay）共用技能：遊戲圖片、美術、九宮格、比例與匯入設定；實際生圖搭配製作技能。",
       "selectors": [
         {
           "section": 4
         }
       ],
-      "sha256": "28bce768fd4dc719f98174edebbdadb6a896ee1d4c7b39fa177ea422b4feb8f0"
+      "displayName": "瘋玩｜遊戲美術",
+      "sha256": "9bd76bcddc55fdd99e39598b3f48162dd38ecbd70700f9a41e3d3e2df9aeca1f",
+      "uiSha256": "98ecd833075c1dc765b69c50e7a542666e63fd9933e31ed5b50e5c235d32a3a3"
     },
     {
       "module": "localization",
       "name": "cp-localization",
-      "description": "玩家文字、翻譯、TMP、缺字、字型及 Localization Table。",
+      "description": "瘋玩（CrazyPlay）共用技能：玩家文字、翻譯、TMP、缺字、字型及 Localization Table。",
       "selectors": [
         {
           "section": 5
         }
       ],
-      "sha256": "1058d1aadd573fe6177fc34083858ad432f1e8151ebacb2caf82262567388390"
+      "displayName": "瘋玩｜文字與多語系",
+      "sha256": "c9e0ee5e045e4ffa3d650717f934364ddab849a624b075cac42353a6fab4024c",
+      "uiSha256": "8ff182a4c53b241d80034dc7cdaaec4e938a31a590eb90bc9fdea8b696bed2e5"
     },
     {
       "module": "verification",
       "name": "cp-verification",
-      "description": "工程、畫面及互動驗證、遊戲問題定位與證據；不自行操作 UI。",
+      "description": "瘋玩（CrazyPlay）共用技能：工程、畫面及互動驗證、遊戲問題定位與證據；不自行操作 UI。",
       "selectors": [
         {
           "section": 6
         }
       ],
-      "sha256": "daa7ad3a37ff6179bd790c354c45ac5773df58a2af41043a0e04c926d50acc49"
+      "displayName": "瘋玩｜問題驗證",
+      "sha256": "257080869b8b35edaf54e4fb3e1d4d5f9ea2cefe7c59ea630d52c619d0a38a98",
+      "uiSha256": "aceb796a4122ed24607180317893a38a2661b73bd7568daf6f8b24c02fe63de1"
     },
     {
       "module": "build-release",
       "name": "cp-build-release",
-      "description": "遊戲打包、APK、EXE、H5、進版、簽章、成品交付與留存；不新增發布授權。",
+      "description": "瘋玩（CrazyPlay）共用技能：遊戲打包、APK、EXE、H5、進版、簽章、成品交付與留存；不新增發布授權。",
       "selectors": [
         {
           "section": 7
         }
       ],
-      "sha256": "cc4c011f4331ad8fedb05ccd8e81457218e674558617f3aadc07b242d6a934a8"
+      "displayName": "瘋玩｜打包交付",
+      "sha256": "f85967b9bb33c4120fb004b0a2c79371f30508f3574e4441a7b6b9af7b51e447",
+      "uiSha256": "4634785009ad3d31d36242d66a2cbb94dc19f9e8237560a3eb6eaa47097bad7f"
     },
     {
       "module": "delivery-docs",
       "name": "cp-delivery-docs",
-      "description": "使用者要求成果摘要、改善紀錄或工作交付文件；不自動產報告。",
+      "description": "瘋玩（CrazyPlay）共用技能：使用者要求成果摘要、改善紀錄或工作交付文件；不自動產報告。",
       "selectors": [
         {
           "section": 8
         }
       ],
-      "sha256": "1408f72ae0be9c8eeeae35ff6565d6ac19cd5a90b4f0f14183a0b5b0fdcd812f"
+      "displayName": "瘋玩｜成果文件",
+      "sha256": "ec2a0c35ac6f6c7da41d91245d5aa4f7123dcb82a979e1e227e4bad0565aabdf",
+      "uiSha256": "5af118298a968ddecfb21bfd78d9ebf275bca61446e1729de514bb923d93b2b4"
     },
     {
       "module": "resources",
       "name": "cp-resources",
-      "description": "共用資料庫、個人風格、音樂音效、特效及角色參考查找；不整包下載。",
+      "description": "瘋玩（CrazyPlay）共用技能：共用資料庫、個人風格、音樂音效、特效及角色參考查找；不整包下載。",
       "selectors": [
         {
           "section": 9
         }
       ],
-      "sha256": "9c8b008f4d82bf44cec20e4b59095d15c2f867cfcd05f095640a503d46b00d75"
+      "displayName": "瘋玩｜共用資源",
+      "sha256": "e72e353fe03085c6972b7d35da8bb12d06e42cfdced110833c338b6ea8f39b72",
+      "uiSha256": "7202da0b278d06b9621ddb268a637e42364f652d798fad31d592a75873d5031a"
     },
     {
       "module": "fmv-playback",
       "name": "cp-fmv-playback",
-      "description": "遊戲影片、H5/iOS 片頭、黑屏、卡頓及播放器生命週期的工程診斷。",
+      "description": "瘋玩（CrazyPlay）共用技能：遊戲影片、H5/iOS 片頭、黑屏、卡頓及播放器生命週期的工程診斷。",
       "selectors": [
         {
           "section": 3,
@@ -110,14 +126,18 @@
           ]
         }
       ],
-      "sha256": "4467486e5a32d6415e968fb51eea7fb8d3a4f0ee5e826fba48198f69e31b8ed5"
+      "displayName": "瘋玩｜影片播放",
+      "sha256": "392fca3ae364b96e4c0cbe86054ffca1153e3e2d80a559d47b91c2571f1835aa",
+      "uiSha256": "80be8828dbc310df1bcf26068066ea96a5e4f04d1649ef1971007fe475e80c60"
     },
     {
       "module": "catalog",
       "name": "cp-skills-catalog",
-      "description": "詢問有哪些 Skill、可用哪些技能、某類任務可選項或本次讀過哪些 Skill。",
+      "description": "瘋玩（CrazyPlay）共用技能：詢問有哪些 Skill、可用哪些技能、某類任務可選項或本次讀過哪些 Skill。",
       "selectors": [],
-      "sha256": "7a2f671cd5ed97aed5f049a93993a6282be378c810c509bfa6a1b345da03ac92"
+      "displayName": "瘋玩｜技能目錄",
+      "sha256": "6a2147bfbc589d061498453780c10ee15a05a71457a63324d5c334e5f76a5587",
+      "uiSha256": "ec38693eaa221eafca40d0c56dee3ca4b95f5158bba6be42de175e7cec8b68f2"
     }
   ]
 }
