@@ -4,6 +4,9 @@ from unittest.mock import patch
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location("rules_skills",ROOT/"RulesSkills.py");r=importlib.util.module_from_spec(spec);spec.loader.exec_module(r)
 class RuleSkillsTests(unittest.TestCase):
+ @classmethod
+ def setUpClass(cls):
+  spec=importlib.util.spec_from_file_location("rule_bundle",ROOT/"BuildRuleSkills.py");builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(builder);builder.generate(check=True)
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup);self.root=Path(self.temp.name).resolve();self.p=self.root/"project";(self.p/"Tools").mkdir(parents=True)
   (self.p/"Tools/rules-skill-pilot.json").write_text(json.dumps({"enabled":True,"projectCoreHeadings":["Required"]}))
