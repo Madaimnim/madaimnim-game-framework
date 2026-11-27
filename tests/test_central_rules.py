@@ -124,3 +124,16 @@ class OnDemandStyleTests(unittest.TestCase):
    root=Path(directory)
    with self.assertRaises(ValueError):u.sync_central(root,self.bundle(),style_ids=["STYLE-999"])
    self.assertFalse((root/"COMMON_RULES.md").exists())
+
+
+class LegacyPilotPointerTests(CentralRulesTests):
+ def test_exact_released_legacy_pointer_upgrades(self):
+  self.init();p=self.project();u.migrate_project_pointer(p,self.bundle,self.center,True)
+  (p/"COMMON_RULES.md").write_text(u.LEGACY_POINTER_TEXT,encoding="utf-8")
+  result=u.migrate_project_pointer(p,self.bundle,self.center,True)
+  self.assertEqual(result["status"],"updated");self.assertEqual((p/"COMMON_RULES.md").read_text(encoding="utf-8"),u.POINTER_TEXT)
+ def test_edited_legacy_pointer_is_preserved(self):
+  self.init();p=self.project();u.migrate_project_pointer(p,self.bundle,self.center,True)
+  value=u.LEGACY_POINTER_TEXT+"private amendment\n";(p/"COMMON_RULES.md").write_text(value,encoding="utf-8")
+  with self.assertRaises(ValueError):u.migrate_project_pointer(p,self.bundle,self.center,True)
+  self.assertEqual((p/"COMMON_RULES.md").read_text(encoding="utf-8"),value)

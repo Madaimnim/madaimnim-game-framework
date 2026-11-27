@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-UPDATER_VERSION = "2026-11-27.2"
+UPDATER_VERSION = "2026-11-27.3"
 LIMIT = 262144
 MARKER = "<!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->"
 
@@ -416,6 +416,12 @@ RulesSource: https://github.com/Madaimnim/madaimnim-game-framework/releases/late
 """
 
 
+# Only this exact previously released pointer is accepted, not arbitrary edited pointers.
+LEGACY_POINTER_TEXT = POINTER_TEXT.replace(
+    "依輸出路徑完整閱讀；已由使用者明確啟用並通過同版校驗的按需Skill專案，依該專案AGENTS讀核心及適用模組，未啟用者不變。只查位置",
+    "依輸出路徑完整閱讀。只查位置")
+
+
 def central_location(explicit=None):
     if explicit:
         return Path(explicit).expanduser().resolve()
@@ -462,7 +468,9 @@ def migrate_project_pointer(project, bundle, central, apply=False, sync_updater=
     pointer = target.exists() and target.read_text(encoding="utf-8-sig").startswith(POINTER_MARKER)
     if target.exists() and is_link(target):
         raise ValueError("Linked project rules; preserved")
-    if pointer and target.read_text(encoding="utf-8-sig").replace("\r\n", "\n") != POINTER_TEXT:
+    pointer_text = target.read_text(encoding="utf-8-sig").replace("\r\n", "\n") if pointer else None
+    pointer_current = pointer and pointer_text == POINTER_TEXT
+    if pointer and pointer_text not in (POINTER_TEXT, LEGACY_POINTER_TEXT):
         raise ValueError("Modified pointer; preserved for review")
     if target.exists() and not pointer:
         text, version, order = normalized(target.read_bytes())
@@ -498,7 +506,7 @@ def migrate_project_pointer(project, bundle, central, apply=False, sync_updater=
             with temporary.open("xb") as stream:
                 stream.write(bundle["UpdateRules.py"])
             os.replace(temporary, tool)
-        if not pointer:
+        if not pointer_current:
             temporary = target.with_name(".COMMON_RULES.central.tmp")
             with temporary.open("x", encoding="utf-8", newline="\n") as stream:
                 stream.write(POINTER_TEXT)
@@ -508,7 +516,7 @@ def migrate_project_pointer(project, bundle, central, apply=False, sync_updater=
             (state.parent / "madaimnim-updater.json").write_text(json.dumps({"normalizedSha256": digest(new_tool.rstrip() + "\n")}), encoding="utf-8")
         if target.read_text(encoding="utf-8-sig") != POINTER_TEXT:
             raise ValueError("Pointer readback failed")
-    changed = not pointer or tool_changed
+    changed = not pointer_current or tool_changed
     return {"project": str(project), "status": ("updated" if apply else "would_update") if changed else "current",
             "rulesPath": str(central / "COMMON_RULES.md"), "projectBodyRemoved": not pointer,
             "updaterChanged": tool_changed, "readbackVerified": bool(apply)}

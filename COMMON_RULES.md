@@ -1,7 +1,7 @@
 <!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->
 # 跨專案通用規範
 
-RulesVersion: 2026-11-27.2
+RulesVersion: 2026-11-27.3
 
 本機只保留本正文，各專案使用短入口。先讀下列優先事項，再讀任務適用章節；AGENTS要求全文時按章分段讀完，不以截斷輸出、索引或摘要冒充已讀。
 

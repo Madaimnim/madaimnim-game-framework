@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "rulesVersion": "2026-11-27.2",
-  "commonSha256": "76e6ee63ed1cd585b83ffa8780c3faca19aa0ee48688acf0ea18eeed907829cc",
+  "rulesVersion": "2026-11-27.3",
+  "commonSha256": "4e0448e224ffb4c874ebd070cceb4f0ae2501de377b4b013c823aecad8ba8985",
   "readerSha256": "7c6a658f29f7468238861c1cfc3d5b233b7d6ba307929aded458721fc829ab2a",
   "skills": [
     {
