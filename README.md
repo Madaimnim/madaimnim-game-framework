@@ -44,3 +44,11 @@
 統一導覽及獲取規則只維護於 [COMMON_RULES.md 第9節](COMMON_RULES.md#9-已登記的跨專案共用資源)。說「共用資料庫」先讀該節，分別前往美術、音樂音效、Unity特效及The Far Veil角色基準；本機素材收藏不取代正式入口。
 
 美術條目仍在ArtStyles，音樂音效條目在MusicAudio；外部Unity與角色專案保留各自唯一來源。這裡不另抄一份總表或具體條目。
+
+## 按需 Skill 試行
+
+只有明確啟用的專案使用同版 RulesSkills.py 與 RuleSkills/manifest.json；其他專案仍全文閱讀。共同正文完整保留，技能僅按需擷取既有章節，不維護另一份規範。
+
+啟用專案的新對話先照常 UpdateRules.py，再執行 Tools/RulesSkills.py sync、core、project-core；依任務使用 read <module> 或 project-read <heading>。list 只列已安裝規範技能，完整可用技能以本次對話清單為準；列清單不讀全部正文。版本／雜湊不符或工具不可用時退回全文。
+
+RuleSkills.zip 與 RulesSkills.py 由同一不可變Release及SHA256SUMS校驗，sync保護未知／本機修改，僅更新已明確啟用專案的受管理技能檔。rollback預設預覽，--apply只回復已登記入口與技能；遇管理區塊或技能被另改時停止，保護無關筆記、遊戲程式、資產、成品與雲端。舊Release保留，既有對話已讀上下文不能回收，需新對話驗證。

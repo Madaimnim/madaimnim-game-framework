@@ -1,0 +1,123 @@
+{
+  "format": 1,
+  "rulesVersion": "2026-11-27.1",
+  "commonSha256": "e27dd57704860064d2aebcd1a6c08b8f28d074fc0e79bf4f15c2e82e560fb958",
+  "readerSha256": "7c6a658f29f7468238861c1cfc3d5b233b7d6ba307929aded458721fc829ab2a",
+  "skills": [
+    {
+      "module": "files",
+      "name": "cp-files",
+      "description": "專案檔案歸屬、搬移、清理及舊美術留存；詢問功能不自動清理。",
+      "selectors": [
+        {
+          "section": 2
+        }
+      ],
+      "sha256": "a4206fd1dd9bc6ec357c0b8b8c90f59b20e7d67c232f7b583a51346126fa9f93"
+    },
+    {
+      "module": "unity-ui",
+      "name": "cp-unity-ui",
+      "description": "Unity 架構、場景、Prefab、固定 UI、版面與章節故事線工具修改。",
+      "selectors": [
+        {
+          "section": 3
+        }
+      ],
+      "sha256": "a99d5cc1f94691c5b27a3ffe8f8a7e210507171c95dc1c678ff107d7be9dcaba"
+    },
+    {
+      "module": "art",
+      "name": "cp-art",
+      "description": "遊戲圖片、美術、九宮格、比例與匯入設定；實際生圖搭配製作技能。",
+      "selectors": [
+        {
+          "section": 4
+        }
+      ],
+      "sha256": "28bce768fd4dc719f98174edebbdadb6a896ee1d4c7b39fa177ea422b4feb8f0"
+    },
+    {
+      "module": "localization",
+      "name": "cp-localization",
+      "description": "玩家文字、翻譯、TMP、缺字、字型及 Localization Table。",
+      "selectors": [
+        {
+          "section": 5
+        }
+      ],
+      "sha256": "1058d1aadd573fe6177fc34083858ad432f1e8151ebacb2caf82262567388390"
+    },
+    {
+      "module": "verification",
+      "name": "cp-verification",
+      "description": "工程、畫面及互動驗證、遊戲問題定位與證據；不自行操作 UI。",
+      "selectors": [
+        {
+          "section": 6
+        }
+      ],
+      "sha256": "daa7ad3a37ff6179bd790c354c45ac5773df58a2af41043a0e04c926d50acc49"
+    },
+    {
+      "module": "build-release",
+      "name": "cp-build-release",
+      "description": "遊戲打包、APK、EXE、H5、進版、簽章、成品交付與留存；不新增發布授權。",
+      "selectors": [
+        {
+          "section": 7
+        }
+      ],
+      "sha256": "cc4c011f4331ad8fedb05ccd8e81457218e674558617f3aadc07b242d6a934a8"
+    },
+    {
+      "module": "delivery-docs",
+      "name": "cp-delivery-docs",
+      "description": "使用者要求成果摘要、改善紀錄或工作交付文件；不自動產報告。",
+      "selectors": [
+        {
+          "section": 8
+        }
+      ],
+      "sha256": "1408f72ae0be9c8eeeae35ff6565d6ac19cd5a90b4f0f14183a0b5b0fdcd812f"
+    },
+    {
+      "module": "resources",
+      "name": "cp-resources",
+      "description": "共用資料庫、個人風格、音樂音效、特效及角色參考查找；不整包下載。",
+      "selectors": [
+        {
+          "section": 9
+        }
+      ],
+      "sha256": "9c8b008f4d82bf44cec20e4b59095d15c2f867cfcd05f095640a503d46b00d75"
+    },
+    {
+      "module": "fmv-playback",
+      "name": "cp-fmv-playback",
+      "description": "遊戲影片、H5/iOS 片頭、黑屏、卡頓及播放器生命週期的工程診斷。",
+      "selectors": [
+        {
+          "section": 3,
+          "headings": [
+            "Unity正式來源與工具"
+          ]
+        },
+        {
+          "section": 6,
+          "headings": [
+            "證據留存與問題定位"
+          ]
+        }
+      ],
+      "sha256": "4467486e5a32d6415e968fb51eea7fb8d3a4f0ee5e826fba48198f69e31b8ed5"
+    },
+    {
+      "module": "catalog",
+      "name": "cp-skills-catalog",
+      "description": "詢問有哪些 Skill、可用哪些技能、某類任務可選項或本次讀過哪些 Skill。",
+      "selectors": [],
+      "sha256": "7a2f671cd5ed97aed5f049a93993a6282be378c810c509bfa6a1b345da03ac92"
+    }
+  ]
+}

@@ -13,7 +13,7 @@ import tempfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
-UPDATER_VERSION = "2026-11-24.2"
+UPDATER_VERSION = "2026-11-27.1"
 LIMIT = 262144
 MARKER = "<!-- MADAIMNIM_GAME_FRAMEWORK_RULES -->"
 
@@ -411,7 +411,7 @@ POINTER_TEXT = POINTER_MARKER + """
 
 RulesSource: https://github.com/Madaimnim/madaimnim-game-framework/releases/latest/download/COMMON_RULES.md
 
-本機只有一份共用正文。新工作對話執行 `python Tools/UpdateRules.py`，檢查正式GitHub Release並按需要更新共用正文；依輸出路徑完整閱讀。只查位置可執行 `python Tools/UpdateRules.py --show-location`。本檔不是規範副本，不在此新增通用條文。
+本機只有一份共用正文。新工作對話執行 `python Tools/UpdateRules.py`，檢查正式GitHub Release並按需要更新共用正文；依輸出路徑完整閱讀；已由使用者明確啟用並通過同版校驗的按需Skill專案，依該專案AGENTS讀核心及適用模組，未啟用者不變。只查位置可執行 `python Tools/UpdateRules.py --show-location`。本檔不是規範副本，不在此新增通用條文。
 專案僅在PROJECT_RULES.md保存本案識別、實際來源／入口、必要例外及待辦。共用規範修改須回正式維護來源完成測試、提交、推送、Release與回讀；正常檢查更新不自行發布遊戲或無關變更。
 """
 

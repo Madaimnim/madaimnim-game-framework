@@ -5,6 +5,9 @@ on:
     paths:
       - COMMON_RULES.md
       - UpdateRules.py
+      - RulesSkills.py
+      - BuildRuleSkills.py
+      - RuleSkills/**
       - AGENTS.md
       - ArtStyles/**
       - MusicAudio/**
@@ -42,7 +45,9 @@ jobs:
               with urllib.request.urlopen(req,timeout=60) as response:return json.load(response)
           manifest=json.loads(Path('ArtStyles/manifest.json').read_text(encoding='utf-8'))
           if manifest['libraryVersion']!=version:raise SystemExit('Style/rules version mismatch')
-          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md','ArtStyles_manifest.json']
+          import BuildRuleSkills
+          BuildRuleSkills.generate(check=True)
+          assets=['COMMON_RULES.md','UpdateRules.py','AGENTS.md','RulesSkills.py','RulesSkills.zip','ArtStyles_manifest.json']
           Path('ArtStyles_manifest.json').write_bytes(Path('ArtStyles/manifest.json').read_bytes())
           for entry in manifest['styles']:
               name=entry['file']

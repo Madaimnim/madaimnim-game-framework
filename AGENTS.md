@@ -52,3 +52,7 @@ COMMON_RULES.md 可保存使用者明確授權公開的最少角色來源索引�
 
 - COMMON_RULES第9節是四類資料庫唯一導覽與獲取規則；ArtStyles保存美術條目，MusicAudio保存音樂音效條目。新增或修改MusicAudio時同步其manifest雜湊／libraryVersion、ArtStyles的libraryVersion與RulesVersion，Release包含MusicAudio_manifest.json及索引列出的MUSIC-nnn／SFX-nnn.md並納入SHA256SUMS。
 - UnityEffects與The Far Veil角色基準維持獨立原來源；導覽整理不授權上傳其未提交內容或私人素材。各庫原始資產／權限／驗收與規範文字發布分開確認。
+
+## 按需規範 Skill 維護
+
+COMMON_RULES仍為唯一條款來源；RulesSkills.py只讀核心／適用章節、列目錄及管理明確啟用專案的版本化技能。RuleSkills內只維護發現描述與讀取路由，BuildRuleSkills.py產生同版manifest及確定性ZIP，不另存分歧條文。修改時保留完整正文相容、驗證條款覆蓋／雜湊／安裝衝突／還原，再與RulesVersion、兩個資源manifest版本一起發布；Release包含RulesSkills.py與RulesSkills.zip並納入SHA256SUMS。一般同步不自動啟用其他專案。試行啟用／還原基準留該專案本機Git私有狀態，不公開私人路徑或工作內容。
